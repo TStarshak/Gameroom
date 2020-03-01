@@ -1,9 +1,11 @@
 from backend import db
+from flask_sqlalchemy import SQLAlchemy
 
 class Player (db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(40))
     password = db.Column(db.String(40))
+    email = db.Column(db.String(40))
     rating = db.Column(db.Float)
 
 class Lobby (db.Model):
