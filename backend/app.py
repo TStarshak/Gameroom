@@ -11,11 +11,11 @@ def create_player():
         player_id = random.randint(1, 100)
         player = Player(player_id, random.randint(RATING_MIN, RATING_MAX), 
                 username='Randomplayer{}'.format(player_id), password="rando{}".format(player_id))
-        return json.dumps(player, default=obj_to_dict)
+        return _serialize(player)
 
 @app.route("/api/player/list", methods=["GET"])
 def list_players():
-        return json.dumps(list(Player._mem.values()), default=obj_to_dict)
+        return _serialize(list(Player._mem.values()))
 
 @app.route("/api/room/create", methods=["POST"])
 def create_room():
@@ -23,12 +23,15 @@ def create_room():
         print(players)
         room_id = random.randint(1, 100)
         room = Room(room_id, datetime.datetime.now(), type_=room_id, players=players)
-        return json.dumps(room, default=obj_to_dict)
+        return _serialize(room)
+
+def _serialize(obj):
+        return json.dumps(obj, default=obj_to_dict)
 
 @app.route("/api/room/<room_id>", method=["GET"])
 def room_info(room_id):
-        return json.dumps(Room._mem[room_id])
+        return _serialize(Room._mem[room_id])
 
 @app.route("/api/player/<player_id>", method=["GET"])
 def room_info(player_id):
-        return json.dumps(Player._mem[player_id])
+        return _serialize(Player._mem[player_id])

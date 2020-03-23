@@ -4,3 +4,5 @@ gameroom-front/package-lock.json
 *venv/
 
 .vscode/
+
+backend/__pycache__
