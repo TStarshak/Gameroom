@@ -1,5 +1,6 @@
 from typing import List
-from datetime import date
+from datetime import date, datetime
+from statistics import mean
 
 RATING_MAX = 1000
 RATING_MIN = 0
@@ -24,14 +25,14 @@ class Player:
 
 class Room:
     _mem = {}
-    def __init__(self, id, timestamp, type_, rating, players: List[int]=[], cap=PLAYERS_CAP):
+    def __init__(self, id, timestamp, type_, players: List[int]=[], cap=PLAYERS_CAP, rating=None):
         self.id = id
         self.timestamp = timestamp
         self.type_ = type_
         self.cap = cap
         self.players = players
-        self.rating = rating
-        _mem[id] = self
+        self.rating = mean(map(lambda player_id: Player._mem[player_id].rating, players))
+        self._mem[id] = self
 
     @property
     def size(self):
@@ -53,7 +54,8 @@ class Lobby:
         self.id = id
         self.game = game
         self.rooms = rooms
-        _mem[id] = self
+        self._mem[id] = self
+
     def append(self, room: Room):
         self.rooms.append(room)
 
@@ -64,5 +66,7 @@ class Lobby:
     #     self.rooms.append(room)
 
 def obj_to_dict(obj):
+    if isinstance(obj, (date, datetime)):
+        return obj.isoformat()
     return obj.__dict__
     
