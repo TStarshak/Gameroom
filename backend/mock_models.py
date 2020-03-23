@@ -1,4 +1,5 @@
 from typing import List
+from datetime import date
 
 RATING_MAX = 1000
 RATING_MIN = 0
@@ -9,17 +10,20 @@ These are mock classes for proof of concept before any database setup is involve
 '''
 
 class Player:
-
+    _mem = {}
+    
     def __init__(self, id: int, rating, username, password):
         self.id = id
         self.rating = rating
         self.username = username
         self.password = password
+        self._mem[id] = self
 
     def __repr__(self):
         return str(self.__dict__)
 
 class Room:
+    _mem = {}
     def __init__(self, id, timestamp, type_, rating, players: List[int]=[], cap=PLAYERS_CAP):
         self.id = id
         self.timestamp = timestamp
@@ -27,6 +31,7 @@ class Room:
         self.cap = cap
         self.players = players
         self.rating = rating
+        _mem[id] = self
 
     @property
     def size(self):
@@ -42,17 +47,22 @@ class Room:
 
 class Lobby:
 
+    _mem = {}
+
     def __init__(self, id: int, game: str, rooms: List[Room]=[]):
         self.id = id
         self.game = game
         self.rooms = rooms
-
+        _mem[id] = self
     def append(self, room: Room):
         self.rooms.append(room)
 
     def __hash__(self):
         return hash(self.id)
 
-    def add_room(self, room: Room):
-        self.rooms.append(room)
+    # def add_room(self, room: Room):
+    #     self.rooms.append(room)
+
+def obj_to_dict(obj):
+    return obj.__dict__
     
