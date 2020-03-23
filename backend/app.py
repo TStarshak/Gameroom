@@ -24,3 +24,11 @@ def create_room():
         room_id = random.randint(1, 100)
         room = Room(room_id, datetime.datetime.now(), type_=room_id, players=players)
         return json.dumps(room, default=obj_to_dict)
+
+@app.route("/api/room/<room_id>", method=["GET"])
+def room_info(room_id):
+        return json.dumps(Room._mem[room_id])
+
+@app.route("/api/player/<player_id>", method=["GET"])
+def room_info(player_id):
+        return json.dumps(Player._mem[player_id])
