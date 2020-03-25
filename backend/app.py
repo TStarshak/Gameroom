@@ -24,6 +24,21 @@ def create_room():
         room_id = random.randint(1, 100)
         room = Room(room_id, datetime.datetime.now(), type_=room_id, players=players)
         return _serialize(room)
+        
+@app.route("/api/server/match", methods=["POST"])
+def match_room(room):
+        players = request.get_json().get('players')
+        rooms = _serialize(Room._mem.values())
+        appendedRoom = NULL
+        for x in range (0, len(rooms))
+            if rooms[x] == room:
+                continue
+            if rooms[x].append(room) != NULL
+                appendedRoom = rooms[x].append(room)
+                break
+        if appendedRoom != NULL:
+            return _serialize(appendedRoom)
+        
 
 def _serialize(obj):
         return json.dumps(obj, default=obj_to_dict)
