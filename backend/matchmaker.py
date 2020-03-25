@@ -52,16 +52,16 @@ class Matchmaker:
     def rooms(request: Request, offset: int):
         if request.lobby_id in _games:
             for room in _games[request.lobby_id]:
-                if abs(room.rating - request.player.rating) <= offset:
+                if abs(room.rating.getRating() - request.player.rating.getRating()) <= offset:
                     yield room
 
     @staticmethod
     def match_quality(request: Request, room: Room) -> float:
         def diff_rating(request, room):
-            return abs(request.player.rating - room.rating)/(RATING_MAX - RATING_MIN)  
+            return abs(request.player.rating.getRating() - room.rating)/(RATING_MAX - RATING_MIN)  
         def var_rating(request, room):
-            avg = (room.rating * room.size + request.player.rating)/(room.size + 1)
-            return variance(map(lambda player: player.rating, room.players))/((RATING_MAX - avg)*(avg - RATING_MIN))
+            avg = (room.rating * room.size + request.player.rating.getRating())/(room.size + 1)
+            return variance(map(lambda player: player.rating.getRating(), room.players))/((RATING_MAX - avg)*(avg - RATING_MIN))
         
         return 1.0 - ((2/3)*diff_rating(request, room) + (1/3)*var_rating(request, room))
     
