@@ -1,6 +1,7 @@
 from typing import List
 from datetime import date, datetime
 from statistics import mean
+from Rating import *
 
 RATING_MAX = 1000
 RATING_MIN = 0
@@ -15,7 +16,7 @@ class Player:
     
     def __init__(self, id: int, rating, username, password):
         self.id = id
-        self.rating = rating
+        self.rating = Rating(rating, rating, 1)
         self.username = username
         self.password = password
         self._mem[id] = self
@@ -31,7 +32,7 @@ class Room:
         self.type_ = type_
         self.cap = cap
         self.players = players
-        self.rating = mean(map(lambda player_id: Player._mem[player_id].rating, players))
+        self.rating = Rating( mean(map(lambda player_id: Player._mem[player_id].rating, players)), mean(map(lambda player_id: Player._mem[player_id].rating, players)), cap)
         self._mem[id] = self
    
     def append(room):
@@ -47,7 +48,8 @@ class Room:
 
     def __iadd__(self, other):
         assert other.__class__ == Player.__class__
-        rating = (self.rating * self.size + other.rating)/(self.size + 1)
+        temp = (self.rating.getRating() * self.size + other.rating.getRating())/(self.size + 1)
+        self.rating.updateRating(temp, temp, self.size + 1)                        
         self.players.append(other)
 
     def __repr__(self):
@@ -76,4 +78,6 @@ def obj_to_dict(obj):
     if isinstance(obj, (date, datetime)):
         return obj.isoformat()
     return obj.__dict__
-    
+
+
+
