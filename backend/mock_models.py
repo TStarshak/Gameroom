@@ -1,7 +1,7 @@
 from typing import List
 from datetime import date, datetime
 from statistics import mean
-from Rating import *
+from rating import *
 
 RATING_MAX = 1000
 RATING_MIN = 0
