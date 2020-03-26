@@ -1,7 +1,7 @@
 from typing import List
 from datetime import date, datetime
 from statistics import mean
-from rating import *
+from .Rating import *
 
 RATING_MAX = 1000
 RATING_MIN = 0
@@ -35,9 +35,9 @@ class Room:
         self.rating = Rating( mean(map(lambda player_id: Player._mem[player_id].rating, players)), mean(map(lambda player_id: Player._mem[player_id].rating, players)), cap)
         self._mem[id] = self
    
-    def append(room):
+    def append(self, room):
         totalPlayers = room.players + self.players
-        appendedRoom = null
+        appendedRoom = None
         if len(totalPlayers) < self.cap:
             appendedRoom = Room(self.room_id, self.timestamp, type_=self.type, players=totalPlayers)
         return appendedRoom        

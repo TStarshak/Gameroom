@@ -29,14 +29,14 @@ def create_room():
 def match_room(room):
         players = request.get_json().get('players')
         rooms = _serialize(Room._mem.values())
-        appendedRoom = NULL
-        for x in range (0, len(rooms))
+        appendedRoom = None
+        for x in range (0, len(rooms)):
             if rooms[x] == room:
                 continue
-            if rooms[x].append(room) != NULL
+            if rooms[x].append(room) is not None:
                 appendedRoom = rooms[x].append(room)
                 break
-        if appendedRoom != NULL:
+        if appendedRoom is not None:
             return _serialize(appendedRoom)
         
 
