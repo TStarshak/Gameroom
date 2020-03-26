@@ -75,6 +75,10 @@ class Lobby:
 def obj_to_dict(obj):
     if isinstance(obj, (date, datetime)):
         return obj.isoformat()
+    if 'password' in obj.__dict__:
+        copy = dict(obj.__dict__)
+        del copy['password']
+        return copy
     return obj.__dict__
 
 

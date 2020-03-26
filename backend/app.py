@@ -64,3 +64,11 @@ def room_info(room_id):
 @app.route("/api/player/<int:player_id>", methods=["GET"])
 def player_info(player_id):
         return _serialize(Player._mem[player_id])
+
+@app.route("/api/player/<int:player_id>/update-rating", methods=["POST"])
+def update_rating(player_id):
+        toxic = request.get_json().get('toxic')
+        skill = request.get_json().get('skill')
+        player = Player._mem[player_id]
+        player.rating.updateRating(toxic, skill)
+        return _serialize(player)
