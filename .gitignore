@@ -6,3 +6,5 @@ gameroom-front/package-lock.json
 .vscode/
 
 backend/__pycache__
+
+*.pyc

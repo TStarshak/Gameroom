@@ -2,5 +2,6 @@ flask
 flask_sqlalchemy
 flask_bcrypt
 flask-redis
+flask-script
 green
 tox

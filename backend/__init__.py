@@ -12,7 +12,7 @@ import os
 #### config ####
 ################
 
-app = Flask(__name__)
+# app = Flask(__name__)
 # bcrypt = Bcrypt(app)
 # app.config.from_object(os.environ['APP_SETTINGS'])
 # db = SQLAlchemy(app)
