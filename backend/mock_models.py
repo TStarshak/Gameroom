@@ -32,15 +32,13 @@ class Room:
         self.type_ = type_
         self.cap = cap
         self.players = players
-        self.rating = Rating( mean(map(lambda player_id: Player._mem[player_id].rating, players)), mean(map(lambda player_id: Player._mem[player_id].rating, players)), cap)
+        self.rating = mean(map(lambda player_id: Player._mem[player_id].rating.getRating(), players))
         self._mem[id] = self
    
     def append(self, room):
-        totalPlayers = room.players + self.players
-        appendedRoom = None
-        if len(totalPlayers) < self.cap:
-            appendedRoom = Room(self.room_id, self.timestamp, type_=self.type, players=totalPlayers)
-        return appendedRoom        
+        if len(self.players) + len(room.players) < self.cap:
+            self.players += room.players
+            del self._mem[room.id]    
         
     @property
     def size(self):

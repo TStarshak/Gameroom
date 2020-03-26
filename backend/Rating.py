@@ -1,4 +1,4 @@
-from math import *
+import math
 
 class Rating ():
 
