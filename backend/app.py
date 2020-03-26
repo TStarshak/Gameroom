@@ -43,10 +43,10 @@ def match_room(room):
 def _serialize(obj):
         return json.dumps(obj, default=obj_to_dict)
 
-@app.route("/api/room/<room_id>", method=["GET"])
+@app.route("/api/room/<room_id>", methods=["GET"])
 def room_info(room_id):
         return _serialize(Room._mem[room_id])
 
-@app.route("/api/player/<player_id>", method=["GET"])
-def room_info(player_id):
+@app.route("/api/player/<player_id>", methods=["GET"])
+def player_info(player_id):
         return _serialize(Player._mem[player_id])
