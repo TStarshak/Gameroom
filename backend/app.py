@@ -28,6 +28,7 @@ def create_room():
         
 @app.route("/api/server/match", methods=["POST"])
 def match_room():
+        print(request.json)
         player_id = request.get_json().get('player')
         # rooms = _serialize(Room._mem.values())
         # appendedRoom = None

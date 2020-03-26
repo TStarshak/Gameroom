@@ -7,7 +7,7 @@ function Notification(props) {
     for (let i = 0; i < Math.ceil(plength / 2); i++){
         let rowItems = []
         for(let j = 0; j < Math.min(2, plength - i * 2); j++){
-            rowItems.push(<Col><h2>{props.players[i * 2 + j].name}</h2></Col>)
+            rowItems.push(<Col><h2>{props.players[i * 2 + j].username}</h2></Col>)
         }
         items.push(<Row>{rowItems}</Row>)
     }
