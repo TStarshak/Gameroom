@@ -5,3 +5,4 @@ flask-redis
 flask-script
 green
 tox
+pytest

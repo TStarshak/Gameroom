@@ -8,3 +8,11 @@ gameroom-front/package-lock.json
 backend/__pycache__
 
 *.pyc
+
+.tox/
+
+.pytest_cache/
+
+__pycache__/
+
+*egg-info/

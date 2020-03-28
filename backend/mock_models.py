@@ -41,7 +41,7 @@ class Room:
         self._mem[id] = self
 
     def append(self, room):
-        if len(self.players) + len(room.players) < self.cap:
+        if len(self.players) + len(room.players) <= self.cap:
             self.players += room.players
             del self._mem[room.id]
 
