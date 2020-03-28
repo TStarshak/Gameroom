@@ -49,13 +49,6 @@ class Room:
     def size(self):
         return len(self.players)
 
-    def __iadd__(self, other):
-        assert other.__class__ == Player.__class__
-        temp = (self.rating.getRating() * self.size
-                + other.rating.getRating())/(self.size + 1)
-        self.rating.updateRating(temp, temp, self.size + 1)
-        self.players.append(other)
-
     def __repr__(self):
         return str(self.__dict__)
 
