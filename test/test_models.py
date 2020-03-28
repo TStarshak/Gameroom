@@ -55,3 +55,24 @@ class TestRoom:
         room.append(Room(id=2, timestamp=datetime.datetime.now(),
                          type_=2, players=additional))
         assert len(players) + len(additional) == room.size
+
+class TestPlayer:
+    def test_creation(self):
+        """
+        Creation test
+        """
+        player = Player(3, 4.8, username= 'Mickey', password="rando")
+        assert player.username =='Mickey'
+        assert player.id == 3
+        assert player.rating.skill == 4.8
+        assert player.password == "rando"
+    
+    def test_rating(self):
+        """
+        Rating test
+        """
+        player = Player(1, 2, username = 'cat', password = 'mouse')
+        assert player.rating.skill == 2
+        assert player.rating.toxic == 2
+        assert player.rating.numEvals == 1
+    
