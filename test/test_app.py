@@ -46,8 +46,8 @@ def test_player_json(client):
     player = json.loads(response.get_data(as_text=True))
 
     assert response.status_code == 200
-    assert RATING_MIN <= player['rating']['toxic'] <= RATING_MAX
-    assert RATING_MIN <= player['rating']['skill'] <= RATING_MAX
+    assert RATING_MIN <= player['rating']['toxic']
+    assert RATING_MIN <= player['rating']['skill']
     assert player['id'] == 1
     assert player['username'] == 'Randomplayer1'
 
@@ -61,7 +61,7 @@ def test_room_json(client):
     room = json.loads(response.get_data(as_text=True))
 
     assert response.status_code == 200
-    assert RATING_MIN <= room['rating'] <= RATING_MAX
+    assert RATING_MIN <= room['rating']
     assert room['id'] == 1
     assert room['players'] == [1, 3, 5]
 
@@ -77,7 +77,7 @@ def test_room_create(client):
     room = json.loads(response.get_data(as_text=True))
 
     assert response.status_code == 200
-    assert RATING_MIN <= room['rating'] <= RATING_MAX
+    assert RATING_MIN <= room['rating']
     assert room['players'] == [2]
 
 
@@ -92,8 +92,8 @@ def test_players_list(client):
     assert response.status_code == 200
     assert [player['id'] for player in data] == [1, 2, 3, 4, 5]
     for player in data:
-        assert RATING_MIN <= player['rating']['toxic'] <= RATING_MAX
-        assert RATING_MIN <= player['rating']['toxic'] <= RATING_MAX
+        assert RATING_MIN <= player['rating']['toxic']
+        assert RATING_MIN <= player['rating']['toxic']
 
 
 def test_players_match(client):
@@ -107,7 +107,7 @@ def test_players_match(client):
     room = json.loads(response.get_data(as_text=True))
     assert response.status_code == 200
     assert 4 in room['players']
-    assert RATING_MIN <= room['rating'] <= RATING_MAX
+    assert RATING_MIN <= room['rating']
 
 
 def test_rating_update(client):
@@ -121,6 +121,6 @@ def test_rating_update(client):
     player = json.loads(response.get_data(as_text=True))
     assert response.status_code == 200
     assert player['id'] == 1
-    assert RATING_MIN <= player['rating']['toxic'] <= RATING_MAX
-    assert RATING_MIN <= player['rating']['toxic'] <= RATING_MAX
+    assert RATING_MIN <= player['rating']['toxic']
+    assert RATING_MIN <= player['rating']['toxic']
     assert player['rating']['numEvals'] == 2

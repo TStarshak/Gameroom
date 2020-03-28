@@ -1,5 +1,6 @@
 import pytest
 from backend.mock_models import *
+from backend.Rating import Rating
 import datetime
 
 
