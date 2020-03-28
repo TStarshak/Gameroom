@@ -66,7 +66,7 @@ class TestPlayer:
         assert player.id == 3
         assert player.rating.skill == 4.8
         assert player.password == "rando"
-    
+
     def test_rating(self):
         """
         Rating test
@@ -75,4 +75,3 @@ class TestPlayer:
         assert player.rating.skill == 2
         assert player.rating.toxic == 2
         assert player.rating.numEvals == 1
-    
