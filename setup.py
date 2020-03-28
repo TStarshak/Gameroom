@@ -10,6 +10,7 @@ def parse_requirements(filename):
 
 setup(
     version='0.8',
+    name='backend',
     packages=find_packages(where='backend'),
     install_requires=['flask',
                       'flask_sqlalchemy',
