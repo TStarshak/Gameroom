@@ -51,10 +51,10 @@ class Player (db.Model, ModelMixin):
         player.num_evals += 1
         db.session.commit()
 
-    @classmethod
-    def rating(cls, id: int) -> float:
-        player = cls.get_by_id(id)
-        normalized_rating = (player.skill - player.toxic)/(player.skill + player.toxic) # should be between -1 and 1
+    @property
+    def rating(self) -> float:
+        player = self.get_by_id(self.id)
+        normalized_rating = (player.skill - player.toxic)/(player.skill) # should be between -1 and 1
         return round(min(max(((normalized_rating + 1)/2)*(RATING_MAX - RATING_MIN), RATING_MIN), RATING_MAX), 2) # rounding and bounding
     
     @property
@@ -63,7 +63,8 @@ class Player (db.Model, ModelMixin):
             "id" : self.id,
             "username" : self.username,
             "email" : self.email,
-            "rating" : self.rating(self.id)
+            "rating" : self.rating,
+            "num_evals" : self.num_evals
         }
     
 

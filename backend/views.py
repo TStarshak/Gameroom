@@ -117,6 +117,7 @@ def update_rating(player_id):
     data = request.get_json()
     toxic = data.get('toxic')
     skill = data.get('skill')
-    player = models.Player.update_rating(player_id, toxic, skill)
+    models.Player.update_rating(player_id, toxic, skill)
+    return jsonify(models.Player.get_by_id(player_id).representation)
 
         
