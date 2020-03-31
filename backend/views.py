@@ -3,17 +3,36 @@ import json
 from .mock_models import *
 import random
 import datetime
-from backend import app
+from backend import app, models
 
 @app.route("/api/player/create", methods=["POST"])
 def create_player():
     """
-    Expected input: None
+    Expected input: {username, password, email}
     """
-    player_id = random.randint(1, 100)
-    player = Player(player_id, random.randint(RATING_MIN, RATING_MAX),
-                    username='Randomplayer{}'.format(player_id), password="rando{}".format(player_id))
-    return _serialize(player)
+    # if request.get_json() is None:
+    #     player_id = random.randint(1, 100)
+    #     player = Player(player_id, random.randint(RATING_MIN, RATING_MAX),
+    #                     username='Randomplayer{}'.format(player_id), password="rando{}".format(player_id))
+    #     """
+    #     # Read data from given json
+    #     {
+    #         "username" : ""
+    #         "password" : ""
+    #         "email" : ""
+    #     }
+    #     -> data
+    #     Player.create(**data)
+    #     """
+    #     return _serialize(player)
+    data = request.get_json()
+    player, status = models.Player.create(username=data.get("username"), 
+                                          password=data.get("password"), 
+                                          email=data.get("email"))
+    if player is None:
+        return json.dumps({"error": status}), 500
+    return jsonify(player.representation)
+
 
 
 @app.route("/api/player/list", methods=["GET"])
@@ -88,8 +107,16 @@ def player_info(player_id):
 
 @app.route("/api/player/<int:player_id>/update-rating", methods=["POST"])
 def update_rating(player_id):
-    toxic = request.get_json().get('toxic')
-    skill = request.get_json().get('skill')
-    player = Player._mem[player_id]
-    player.rating.updateRating(toxic, skill)
-    return _serialize(player)
+    # if request.get_json() is None:
+    #     toxic = request.get_json().get('toxic')
+    #     skill = request.get_json().get('skill')
+    #     player = Player._mem[player_id]
+    #     player.rating.updateRating(toxic, skill)
+    #     return _serialize(player)
+    # else:
+    data = request.get_json()
+    toxic = data.get('toxic')
+    skill = data.get('skill')
+    player = models.Player.update_rating(player_id, toxic, skill)
+
+        
