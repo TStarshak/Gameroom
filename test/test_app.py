@@ -4,7 +4,7 @@ import tempfile
 import pytest
 import json
 
-from backend.app import app
+from backend import app
 from backend.mock_models import Room, Player, RATING_MAX, RATING_MIN
 import datetime
 import random

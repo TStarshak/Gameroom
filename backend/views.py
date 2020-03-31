@@ -3,9 +3,7 @@ import json
 from .mock_models import *
 import random
 import datetime
-
-app = Flask(__name__)
-
+from backend import app
 
 @app.route("/api/player/create", methods=["POST"])
 def create_player():
