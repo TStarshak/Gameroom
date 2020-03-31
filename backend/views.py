@@ -7,6 +7,9 @@ from backend import app
 
 @app.route("/api/player/create", methods=["POST"])
 def create_player():
+    """
+    Expected input: None
+    """
     player_id = random.randint(1, 100)
     player = Player(player_id, random.randint(RATING_MIN, RATING_MAX),
                     username='Randomplayer{}'.format(player_id), password="rando{}".format(player_id))
@@ -20,6 +23,12 @@ def list_players():
 
 @app.route("/api/room/create", methods=["POST"])
 def create_room():
+    """
+    Expected input:
+    {
+        'players' : [<player-id>]
+    }
+    """
     players = request.get_json().get('players')
     print(players)
     room_id = random.randint(1, 100)
@@ -30,6 +39,12 @@ def create_room():
 
 @app.route("/api/server/match", methods=["POST"])
 def match_room():
+    """
+    Expected input:
+    {
+        'players' : [<player-id>]
+    }
+    """
     print(request.json)
     player_id = request.get_json().get('player')
     # rooms = _serialize(Room._mem.values())
