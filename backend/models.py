@@ -80,7 +80,7 @@ class Room(db.Model, ModelMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.datetime.now())
-    lobby_id = db.Column(db.Integer) #, db.ForeignKey('lobby.id')) disabling this for now
+    lobby_id = db.Column(db.Integer, db.ForeignKey('lobby.id'))
     players = db.relationship('Player', backref='joined_room', lazy='dynamic')
 
     @property
@@ -93,11 +93,21 @@ class Room(db.Model, ModelMixin):
             "rating" : mean([player.rating for player in self.players])
         }
 
-# class Lobby (db.Model, ModelMixin):
-#     __tablename__ = 'lobby'
-#     id = db.Column(db.Integer, primary_key=True)
-#     game = db.Column(db.String(40))
-#     timestamp = db.Column(db.Integer)
-#     short_description = db.Column(db.String(40))
-#     cap = db.Column(db.Integer)
-#     rooms = db.relationship('Room', backref='game_lobby', lazy='dynamic')
+class Lobby (db.Model, ModelMixin):
+    __tablename__ = 'lobby'
+    id = db.Column(db.Integer, primary_key=True)
+    game = db.Column(db.String(40))
+    timestamp =  db.Column(db.DateTime, default=datetime.datetime.now())
+    short_description = db.Column(db.String(40))
+    cap = db.Column(db.Integer)
+    rooms = db.relationship('Room', backref='game_lobby', lazy='dynamic')
+
+    @property
+    def representation(self):
+        return {
+            "id" : self.id,
+            "game" : self.game,
+            "timestamp" : self.timestamp,
+            "desc" : self.short_description,
+            "cap" : self.cap
+        }

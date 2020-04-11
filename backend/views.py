@@ -46,15 +46,17 @@ def create_room():
     Expected input:
     {
         'players' : [<player-id>]
+        'lobby' : lobby_id
     }
     """
     player_ids = request.get_json().get('players')
+    lobby_ids = request.get_json().get('lobby')
     # print(players)
     # room_id = random.randint(1, 100)
     # room = Room(room_id, datetime.datetime.now(),
     #             type_=room_id, players=players)
     players = [models.Player.get_by_id(player_id) for player_id in player_ids]
-    room, status = models.Room.create(players=players, lobby_id=0)
+    room, status = models.Room.create(players=players, lobby_id=lobby_ids)
     if room is None:
         return json.dumps({"error": status}), 500
     return jsonify(room.representation)
