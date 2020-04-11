@@ -2,8 +2,9 @@ import pytest
 from backend.mock_models import *
 from backend.Rating import Rating
 import datetime
+import random
 
-
+@pytest.mark.skip(reason="Moving current implementation")
 class TestRoom:
 
     def populate():
@@ -56,6 +57,7 @@ class TestRoom:
                          type_=2, players=additional))
         assert len(players) + len(additional) == room.size
 
+@pytest.mark.skip("Moving current implementation")
 class TestPlayer:
     def test_creation(self):
         """

@@ -4,6 +4,8 @@ from .mock_models import *
 import random
 import datetime
 from backend import app, models, socketio
+import flask_socketio as fsio
+from flask_socketio import ConnectionRefusedError
 from .lobby import *
 
 @app.route("/api/player/create", methods=["POST"])
@@ -126,16 +128,21 @@ def update_rating(player_id):
     models.Player.update_rating(player_id, toxic, skill)
     return jsonify(models.Player.get_by_id(player_id).representation)
 
-@socketio.on('connect', 'api/sockets/connection')
+@socketio.on('connect', '/api/sockets/connection')
 def connect_player():
     player_id = request.args.get('player', type=int)
-    assert models.Player.exist(player_id)
-    connect(player_id)
-    socketio.emit('connect_callback', {'status': 'Connected'}, namespace='api/sockets/connection')
+    print(player_id)
+    print(request.sid)
+    sid = request.sid
+    if is_online(player_id):
+        raise ConnectionRefusedError('Player is alrady online, attempts to have another session is refused')
+    assert models.Player.get_by_id(player_id)
+    is_valid = connect(player_id, sid)
+    socketio.emit('connect_callback', {'status': 'Connected'}, namespace='/api/sockets/connection')
 
-@socketio.on('disconnect', 'api/sockets/connection')
-def connect_player(sid, data):
-    player_id = request.args.get('player', type=int)
-    assert models.Player.exist(player_id)
-    disconnect(player_id)
-    socketio.emit('connect_callback', {'status': 'Disconnected'}, namespace='api/sockets/connection')
+@socketio.on('disconnect', '/api/sockets/connection')
+def disconnect_player():
+    # player_id = request.args.get('player', type=int)
+    # assert models.Player.get_by_id(player_id)
+    disconnect(request.sid)
+    socketio.emit('connect_callback', {'status': 'Disconnected'}, namespace='/api/sockets/connection')
