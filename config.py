@@ -18,4 +18,4 @@ class TestConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JSON_SORT_KEYS = False
     TESTING = True
-    DEBUG = True
+    DEBUG = False
