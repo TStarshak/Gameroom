@@ -3,7 +3,8 @@ import json
 from .mock_models import *
 import random
 import datetime
-from backend import app, models
+from backend import app, models, socketio
+from .lobby import *
 
 @app.route("/api/player/create", methods=["POST"])
 def create_player():
@@ -37,8 +38,7 @@ def create_player():
 
 @app.route("/api/player/list", methods=["GET"])
 def list_players():
-    return _serialize(list(Player._mem.values()))
-
+    return jsonify(list(map(lambda player: player.representation, models.Player.query.all())))
 
 @app.route("/api/room/create", methods=["POST"])
 def create_room():
@@ -48,12 +48,16 @@ def create_room():
         'players' : [<player-id>]
     }
     """
-    players = request.get_json().get('players')
-    print(players)
-    room_id = random.randint(1, 100)
-    room = Room(room_id, datetime.datetime.now(),
-                type_=room_id, players=players)
-    return _serialize(room)
+    player_ids = request.get_json().get('players')
+    # print(players)
+    # room_id = random.randint(1, 100)
+    # room = Room(room_id, datetime.datetime.now(),
+    #             type_=room_id, players=players)
+    players = [models.Player.get_by_id(player_id) for player_id in player_ids]
+    room, status = models.Room.create(players=players, lobby_id=0)
+    if room is None:
+        return json.dumps({"error": status}), 500
+    return jsonify(room.representation)
 
 
 @app.route("/api/server/match", methods=["POST"])
@@ -97,12 +101,12 @@ def _serialize(obj):
 
 @app.route("/api/room/<int:room_id>", methods=["GET"])
 def room_info(room_id):
-    return _serialize(Room._mem[room_id])
+    return jsonify(models.Room.get_by_id(room_id).representation)
 
 
 @app.route("/api/player/<int:player_id>", methods=["GET"])
 def player_info(player_id):
-    return _serialize(Player._mem[player_id])
+    return jsonify(models.Player.get_by_id(player_id).representation)
 
 
 @app.route("/api/player/<int:player_id>/update-rating", methods=["POST"])
@@ -120,4 +124,16 @@ def update_rating(player_id):
     models.Player.update_rating(player_id, toxic, skill)
     return jsonify(models.Player.get_by_id(player_id).representation)
 
-        
+@socketio.on('connect', 'api/sockets/connection')
+def connect_player():
+    player_id = request.args.get('player', type=int)
+    assert models.Player.exist(player_id)
+    connect(player_id)
+    socketio.emit('connect_callback', {'status': 'Connected'}, namespace='api/sockets/connection')
+
+@socketio.on('disconnect', 'api/sockets/connection')
+def connect_player(sid, data):
+    player_id = request.args.get('player', type=int)
+    assert models.Player.exist(player_id)
+    disconnect(player_id)
+    socketio.emit('connect_callback', {'status': 'Disconnected'}, namespace='api/sockets/connection')

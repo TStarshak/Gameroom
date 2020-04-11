@@ -7,3 +7,6 @@ flask-migrate
 green
 tox
 pytest
+rq
+redis
+flask-socketio

@@ -1,6 +1,7 @@
 from backend import db
 import datetime
 import math
+from statistics import mean
 
 RATING_MAX = 1000
 RATING_MIN = 0
@@ -26,6 +27,10 @@ class ModelMixin(object):
     @classmethod
     def get_by_id(cls, id_):
         return cls.query.get_or_404(id_)
+
+    @classmethod
+    def exist(cls, id_):
+        return cls.query.get(id_) != None
 
     def representation(self):
         raise NotImplementedError
@@ -75,14 +80,24 @@ class Room(db.Model, ModelMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.datetime.now())
-    lobby_id = db.Column(db.Integer, db.ForeignKey('lobby.id'))
+    lobby_id = db.Column(db.Integer) #, db.ForeignKey('lobby.id')) disabling this for now
     players = db.relationship('Player', backref='joined_room', lazy='dynamic')
 
-class Lobby (db.Model, ModelMixin):
-    __tablename__ = 'lobby'
-    id = db.Column(db.Integer, primary_key=True)
-    game = db.Column(db.String(40))
-    timestamp = db.Column(db.Integer)
-    short_description = db.Column(db.String(40))
-    cap = db.Column(db.Integer)
-    rooms = db.relationship('Room', backref='game_lobby', lazy='dynamic')
+    @property
+    def representation(self):
+        return {
+            "id" : self.id,
+            "timestamp" : self.timestamp,
+            "lobby_id" : self.lobby_id,
+            "players" : [player.representation for player in self.players],
+            "rating" : mean([player.rating for player in self.players])
+        }
+
+# class Lobby (db.Model, ModelMixin):
+#     __tablename__ = 'lobby'
+#     id = db.Column(db.Integer, primary_key=True)
+#     game = db.Column(db.String(40))
+#     timestamp = db.Column(db.Integer)
+#     short_description = db.Column(db.String(40))
+#     cap = db.Column(db.Integer)
+#     rooms = db.relationship('Room', backref='game_lobby', lazy='dynamic')

@@ -9,6 +9,9 @@ from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
 from config import Config
 import os
+import logging
+
+logger = logging.getLogger('Global logger')
 
 ################
 #### config ####
@@ -16,8 +19,20 @@ import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-app = Flask(__name__)
-app.config.from_object(Config)
+def create_app(config):
+    app = Flask(__name__)
+    app.config.from_object(config)
+    return app
+
+from rq import Queue
+from rq.job import Job
+from worker import conn
+from flask_socketio import SocketIO
+import redis
+# redis_lobby = redis.StrictRedis(charset="utf-8",
+#                       decode_responses=True)
+app = create_app(Config)
+socketio = SocketIO(app)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'mydatabase.db')
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
