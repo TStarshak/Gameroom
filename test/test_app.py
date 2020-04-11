@@ -145,18 +145,19 @@ def test_players_list(client):
     for player in data:
         assert RATING_MIN <= player['rating'] <= RATING_MAX
 
-# def test_players_match(client): Disabled for now
-#     """Match a current player to one room"""
-#     response = client.post(
-#         '/api/server/match',
-#         data=json.dumps({'player': 4}),
-#         content_type='application/json'
-#     )
+@pytest.mark.skip(reason="Not implemented yet")
+def test_players_match(client):
+    """Match a current player to one room"""
+    response = client.post(
+        '/api/server/match',
+        data=json.dumps({'player': 4}),
+        content_type='application/json'
+    )
 
-#     room = json.loads(response.get_data(as_text=True))
-#     assert response.status_code == 200
-#     assert 4 in room['players']
-#     assert RATING_MIN <= room['rating']
+    room = json.loads(response.get_data(as_text=True))
+    assert response.status_code == 200
+    assert 4 in room['players']
+    assert RATING_MIN <= room['rating']
 
 
 def test_rating_update(client):
