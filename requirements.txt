@@ -10,3 +10,4 @@ pytest
 rq
 redis
 flask-socketio
+flask-login

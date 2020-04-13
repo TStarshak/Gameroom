@@ -200,7 +200,7 @@ def save_room(room_id: int):
     players = [models.Player.get_by_id(player_id) for player_id in player_ids]
     room, status = models.Room.create(players=players, lobby_id=lobby_id)
 
-def connect(player_id: int, sid: int):
+def connect_session(player_id: int, sid: int):
     """
     Connect player to online session
 
@@ -226,7 +226,7 @@ def connect(player_id: int, sid: int):
 def is_online(player_id):
     return conn.sismember('online', player_id)
 
-def disconnect(sid: int):
+def disconnect_session(sid: int):
     """
     Disconnect player to online session. 
     All information regarding player will be deregistered from rooms and all data structures proposed

@@ -5,9 +5,21 @@ import random
 import datetime
 from backend import app, models, socketio, logger
 import flask_socketio as fsio
-from flask_socketio import ConnectionRefusedError, leave_room, join_room, close_room, rooms
+from flask_socketio import ConnectionRefusedError, leave_room, join_room, close_room, rooms, disconnect
 from .lobby import *
 import backend.lobby as lobby
+from flask_login import current_user, login_user, logout_user, login_required
+import functools
+
+def authenticated_only(f):
+    @functools.wraps(f)
+    def wrapped(*args, **kwargs):
+        if not current_user.is_authenticated:
+            logger.debug("User have been disconnected due to not matching auth")
+            disconnect()
+        else:
+            return f(*args, **kwargs)
+    return wrapped
 
 @app.route("/api/player/create", methods=["POST"])
 def create_player():
@@ -42,6 +54,23 @@ def create_player():
 def list_players():
     return jsonify(list(map(lambda player: player.representation, models.Player.query.all())))
 
+@app.route("/api/auth/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
+    player = models.Player.query.filter_by(username=username).first()
+    if not player or not player.verify_password(password):
+        return jsonify(status="Failed credentials")
+    login_user(player)
+    return jsonify(status="{} logged in".format(username))
+
+@app.route("/api/auth/logout", methods=["GET", "POST"])
+@login_required
+def logout():
+    logout_user()
+    return jsonify(status="logged out")
+
 @app.route("/api/room/create", methods=["POST"])
 def create_room():
     """
@@ -66,45 +95,6 @@ def create_room():
     #     return json.dumps({"error": status}), 500
     # return jsonify(room.representation)
 
-
-# @app.route("/api/server/match", methods=["POST"])
-# def match_room():
-#     """
-#     Expected input:
-#     {
-#         'players' : [<player-id>]
-#     }
-#     """
-#     print(request.json)
-#     player_id = request.get_json().get('player')
-#     # rooms = _serialize(Room._mem.values())
-#     # appendedRoom = None
-#     # for x in range (0, len(rooms)):
-#     #     if rooms[x] == room:
-#     #         continue
-#     #     if rooms[x].append(room) is not None:
-#     #         appendedRoom = rooms[x].append(room)
-#     #         break
-#     # if appendedRoom is not None:
-#     #     return _serialize(appendedRoom)
-#     # Create room with player in it
-#     # room_id = random.randint(1, 100)
-#     # single_room = Room(room_id, datetime.datetime.now(),
-#     #                    type_=room_id, players=[player_id])
-#     # for room in Room._mem.values():
-#     #     if room == single_room:
-#     #         continue
-#     #     if len(room.players) < room.cap:
-#     #         room.append(single_room)
-#     #         print(single_room)
-#     #         print(room)
-#     #         del single_room
-#     #         return _serialize(room)
-
-# @socketio.on('match', namespace='/api/sockets/connection')
-# def match_player(json):
-#     data = json.loads(json)
-#     player_id = data['player']
 @socketio.on('match', '/connection')
 def match_player(data):
     player_id = data['player']
@@ -154,6 +144,7 @@ def update_rating(player_id):
     return jsonify(models.Player.get_by_id(player_id).representation)
 
 @socketio.on('connect', '/connection')
+@authenticated_only
 def connect_player():
     player_id = request.args.get('player', type=int)
     print(player_id)
@@ -163,11 +154,12 @@ def connect_player():
         logger.debug('Player {} already online'.format(player_id))
         raise ConnectionRefusedError('Player is alrady online, attempts to have another session is refused')
     assert models.Player.get_by_id(player_id)
-    is_valid = connect(player_id, sid)
+    is_valid = connect_session(player_id, sid)
     socketio.emit('connect_callback', {'status': 'Connected'}, namespace='/connection')
 
 @socketio.on('disconnect', '/connection')
+@authenticated_only
 def disconnect_player():
     # player_id = request.args.get('player', type=int)
     # assert models.Player.get_by_id(player_id)
-    disconnect(request.sid)
+    disconnect_session(request.sid)

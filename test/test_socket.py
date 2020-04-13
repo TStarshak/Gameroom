@@ -79,6 +79,19 @@ def client(db, app, request):
     with app.test_client() as client:
         return client
 
+def login(player, app_client):
+    return app_client.post(
+            '/api/auth/login',
+            data=json.dumps({'username': player.username,
+                             'password': player.password}),
+            content_type='application/json'
+        )
+
+def logout(app_client):
+    return app_client.get(
+        '/api/auth/logout'
+    )
+
 # @pytest.fixture
 # def mock_players(db, app, request):
 #     # db_fd, app.config['DATABASE'] = tempfile.mkstemp()
@@ -89,37 +102,44 @@ def client(db, app, request):
 
 def test_connection(app, client):
     namespace = '/connection'
+    response = login(mock_players[1], client)
+    print(response.get_data(as_text=True))
     socket_client = socketio.test_client(app, flask_test_client=client)
-    socket_client_attack = socketio.test_client(app, flask_test_client=client)
+    socket_client_attack = socketio.test_client(app, flask_test_client=app.test_client())
     socket_client.connect(namespace=namespace, query_string='player=1')
     received = socket_client.get_received(namespace)
     socket_client_attack.connect(namespace=namespace, query_string='player=1')
-    assert socket_client.is_connected(namespace)
     # assert not socket_client_attack.is_connected(namespace)
     print(received)
     socket_client.disconnect(namespace=namespace)
-    socket_client_attack.disconnect(namespace=namespace)
     assert len(received) == 1
     assert received[0]['args'][0]['status'] == 'Connected'
     assert not socket_client.is_connected(namespace)
 
-def test_players_match(app, client):
+def test_players_match(app):
     namespace = '/connection'
     global mock_players
+    clients = {}
     socket_clients = {}
     for player in mock_players.values():
+        clients[player.id] = app.test_client()
+        client = clients[player.id]
         socket_clients[player.id] = socketio.test_client(app, flask_test_client=client)
+        login_response = login(player, client)
         socket_clients[player.id].connect(namespace=namespace, query_string='player={}'.format(player.id))
         response = client.post(
-        '/api/room/create',
-        data=json.dumps({'players': [player.id],
-                         'lobby' : 1}),
-        content_type='application/json'
+            '/api/room/create',
+            data=json.dumps({'players': [player.id],
+                            'lobby' : 1}),
+            content_type='application/json'
         )
+        
     
     player, _ = models.Player.create(username='Randomplayer{}'.format(PLAYERS_TO_GEN+1), 
                                  email='Rando{}@somewhere.somehow'.format(PLAYERS_TO_GEN+1), 
                                  password='Rand{}'.format(PLAYERS_TO_GEN+1))
+    client = clients[player.id] = app.test_client()
+    response = login(player, client)
     socket_clients[player.id] = socketio.test_client(app, flask_test_client=client)
     player_client = socket_clients[player.id]
     player_client.connect(namespace=namespace, query_string='player={}'.format(player.id))
@@ -128,8 +148,9 @@ def test_players_match(app, client):
     assert len(received) == 2
     assert len(received[-1]['args'][0]['room']['players']) > 1
     # assert received[0]['args'][0]['status'] == 'Connected'
-    for socket_client in socket_clients.values():
+    for socket_client, client in zip(socket_clients.values(), clients.values()):
         socket_client.disconnect(namespace=namespace)
+        logout(client)
         assert not socket_client.is_connected(namespace)
 
 

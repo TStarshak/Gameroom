@@ -11,6 +11,7 @@ class Config(object):
         'sqlite:///' + os.path.join(basedir, 'backend.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JSON_SORT_KEYS = False
+    # SECRET_KEY = str(os.urandom(12).hex()) # Change to set key on production/dev
 
 class TestConfig:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
@@ -19,3 +20,4 @@ class TestConfig:
     JSON_SORT_KEYS = False
     TESTING = True
     DEBUG = False
+    SECRET_KEY = str(os.urandom(12).hex())
