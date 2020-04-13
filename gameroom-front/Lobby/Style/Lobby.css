@@ -1,0 +1,201 @@
+:root {
+    --main-color: teal;
+    --secondary-color: white;
+    --send-message-form: white;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: system-ui;
+    font-weight: 200;
+    color: #3e5869; 
+}
+
+.Lobby{
+    height:100vh;
+}
+
+.end-session{
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+
+/* Sideboard */
+
+.sideboard{
+    background-color: teal;
+    height: 100%;
+    border-right: black solid;
+}
+
+.flex-container-column{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+}
+
+.flex-container-row{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+}
+
+.sideboard .flex-item:nth-child(1){
+    order:0;
+    flex: 30 1 auto;
+    align-self: auto;
+    -ms-flex-item-align: auto;
+    align-self: auto;
+}   
+.sideboard .flex-item:nth-child(2){
+    order:1;
+    flex: 1 1 auto;
+    align-self: auto;
+    -ms-flex-item-align: auto;
+    align-self: auto;
+}   
+
+.profile{
+    background-color:  rgb(87, 243, 229);
+    width: 100%;
+    text-align: center;
+    
+}
+
+.profile p{
+    padding: auto;
+}
+
+.upper-sideboard{
+    display: flex;
+    flex-direction: column-reverse;
+    background-color: teal;
+    border-bottom: 2px solid black;
+}
+
+.player-list{
+    width: 70%;
+    border-radius: 5px;
+    margin: 0 auto;
+    flex: 9 1 auto;
+    max-height:300px;
+    background-color: white;
+    border: 2px solid black;
+    padding: 0;
+    align-items: center;
+}
+
+.user-list{
+    height: 100%;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.user-list-item{
+    width: 100%;
+    text-align: center;
+    border: 2px solid black;
+    margin: 0;
+}
+
+.user-list button{
+    border-radius: 50%;
+    border: 2px solid black;
+    margin: 5px auto;
+}
+
+
+.game-name{
+    margin-top: 30px;
+    border-radius: 5px;
+    width: 70%;
+    text-align: center;
+    margin: 40px auto;
+    flex: 1 1 auto;
+    max-height: 40px;
+    background-color: white;
+    border: 2px solid black;
+}
+
+
+
+/* Chat room */
+.chatRoom{
+    height: 100%;
+    display: flex;
+
+    flex-direction: column;
+ 
+    flex-wrap: nowrap;
+}
+
+
+.message-list {
+    order:0;
+    flex: 4.5 1 auto;
+    align-self: auto;
+    -ms-flex-item-align: auto;
+
+    box-sizing: border-box;
+    padding-left: 6px;
+    margin:0;
+
+    overflow: scroll;
+    background: var(--secondary-color);
+}
+
+.message{
+    margin: 15px 0;
+}
+
+.bounding{
+    border-radius: 8px;
+    display: inline-block;
+    max-width: 500px;
+    /* width: auto; */
+    background: var(--main-color);
+}
+
+
+.full{
+    height: 100%;
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+}
+     
+.message .message-username {
+    font-size: 11px;
+    color: var(--main-text-color);
+    opacity: 0.9;
+    margin-bottom: 6px;
+}
+.message .message-text {
+
+    color: var(--secondary-color);
+    display: inline;
+    padding: 4px 8px;
+
+}
+
+.send-message-form {
+    background: var(--send-message-form);
+    display: flex;
+    box-sizing: border-box;
+}
+
+.send-message-form input {
+    width: 100%;
+    padding: 10px 10px;
+    height: 100%;
+    border: none;
+    background: var(--send-message-form);
+    font-weight: 200;
+}
