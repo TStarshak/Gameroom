@@ -30,3 +30,7 @@ redis*/
 *.zip
 
 *.rar
+
+package-lock.json
+
+node_modules/

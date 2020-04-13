@@ -5,7 +5,7 @@ import pytest
 import json
 from flask_sqlalchemy import SQLAlchemy
 
-from backend import app as _app, db as _db, models
+from backend import app as _app, db as _db, models, socketio
 from backend.mock_models import Room, Player, RATING_MAX, RATING_MIN
 from config import TestConfig, TESTDB, TESTDB_PATH
 import datetime
@@ -16,7 +16,7 @@ logger = logging.getLogger()
 
 PLAYERS_TO_GEN = 5
 
-players = {}
+mock_players = {}
 
 # def populate():
 #     player_ids = [1, 2, 3, 4, 5]
@@ -62,7 +62,7 @@ def db(app, request):
 
 def configure(app, db, request):
     with app.test_client() as client:
-        global players
+        global mock_players
         for i in range(1, PLAYERS_TO_GEN+1):
             models.Player.create(username='Randomplayer{}'.format(i), 
                                  email='Rando{}@somewhere.somehow'.format(i), 
@@ -74,6 +74,7 @@ def configure(app, db, request):
             #                     'password': 'Rand{}'.format(i)}),
             #     content_type='application/json'
             # )
+            mock_players = {player.id : player.representation for player in models.Player.query.all()}
         models.Lobby.create(game='DOTA 2', 
                             short_description='Some MMORPG game', 
                             cap=8)
@@ -144,20 +145,7 @@ def test_players_list(client):
     assert [player['id'] for player in data] == [1, 2, 3, 4, 5]
     for player in data:
         assert RATING_MIN <= player['rating'] <= RATING_MAX
-
-@pytest.mark.skip(reason="Not implemented yet")
-def test_players_match(client):
-    """Match a current player to one room"""
-    response = client.post(
-        '/api/server/match',
-        data=json.dumps({'player': 4}),
-        content_type='application/json'
-    )
-
-    room = json.loads(response.get_data(as_text=True))
-    assert response.status_code == 200
-    assert 4 in room['players']
-    assert RATING_MIN <= room['rating']
+    
 
 
 def test_rating_update(client):
