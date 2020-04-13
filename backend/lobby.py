@@ -40,7 +40,7 @@ class Matchmaker:
         start = time.time()
         player_id = get_room(single_room_id)['player_ids'][0]
         while is_online(player_id):
-            for room_id in rooms(include_players=False, offset=offset, single_room_id=single_room_id):
+            for room_id in rooms(offset=offset, single_room_id=single_room_id):
                 if cls.match_quality(single_room_id, room_id) < fitness and time.time() - start > 30:
                     offset += offset * 0.5
                     fitness *= 0.75
@@ -71,6 +71,21 @@ class Matchmaker:
     def match(cls, room1_id: int, room2_id: int):
         append_rooms(room1_id, room2_id) #Register room online
 
+"""
+General redis instance handles
+
+Our main data structurs
+
+inmatch -> hashmap of player_id -> room_id where it tells which map the player is in
+online -> set of all online players
+room -> hashmap of room_id -> room representation json
+    {
+        "id" : room id
+        "lobby_id": lobby_id
+        "player_ids": player_ids
+    }
+session -> key val pairs that contains session hash to player_id to ensure single connection from socketio
+"""
 
 def join_room(player_id: int, room_id: int):
     conn.hset('inmatch', player_id, room_id)
@@ -100,9 +115,13 @@ def rating(room_id: int):
     rating = mean([models.Player.get_by_id(player_id).rating for player_id in player_ids])
     return rating
 
-def rooms(include_players=True, offset=None, single_room_id=None) -> Iterator:
+def rooms(offset=None, single_room_id=None) -> Iterator:
     '''
-    Get all online rooms
+    Get all online rooms in an iterator
+
+    Options: Two optional calls will only be used by the matchmake method
+    offset: offset values from given single_room_id and rooms found between 0 and 1 (no diff -> whole range diff)
+    single_room_id: id of room to be matched, should contain one single player
     '''
     assert (offset is None and single_room_id is None) or all([offset, single_room_id])
     assert offset is None or 0 <= offset <= 1
@@ -111,11 +130,7 @@ def rooms(include_players=True, offset=None, single_room_id=None) -> Iterator:
         if single_room_id is not None:
             if abs(rating(single_room_id) - rating(room)) > offset*(RATING_MAX - RATING_MIN):
                 continue
-        players = conn.smembers(room)
-        if include_players:
-            yield room, players
-        else:
-            yield room
+        yield room
 
 def new_ID():
     global __ID_count
@@ -123,6 +138,10 @@ def new_ID():
     return __ID_count
 
 def create_room(player_ids: Union[int, List] , lobby_id: int):
+    """
+    Create and save room
+    Returns: dict of new room created
+    """
     if isinstance(player_ids, int):
         player_ids = [player_ids]
     room_id = new_ID()
@@ -135,13 +154,23 @@ def create_room(player_ids: Union[int, List] , lobby_id: int):
     return get_room(room_id, include_player_info=True)
 
 def get_room(room_id, include_player_info=False, include_rating=True):
+    """
+    Get dict of room
+
+    Inputs:
+    room_id: id of room
+
+    Optionals:
+    include_player_info: include json representation of player, and remove player_ids
+    include_rating: include room rating
+    """
     room_info = json.loads(conn.hget('room',room_id))
     players = [models.Player.get_by_id(player_id) for player_id in room_info['player_ids']]
     if include_player_info:
         room_info['players'] = [player.representation for player in players]
         del room_info['player_ids']
     if include_rating:
-        room_info['rating'] = mean([player.rating for player in players])
+        room_info['rating'] = rating(room_id)
     return room_info
 
 def leave_room(player_id: int):
@@ -160,6 +189,11 @@ def leave_room(player_id: int):
     logger.info(DEBUG, 'Room id {} now with players {}'.format(room_id, data['player_ids']))
 
 def save_room(room_id: int):
+    """
+    [In Development]
+    Save a room to the database
+    This will be integral to the logic of rating post-match
+    """
     data = json.loads(conn.hget('room',room_id))
     player_ids = data['player_ids']
     lobby_id = data['lobby_id']
@@ -167,14 +201,22 @@ def save_room(room_id: int):
     room, status = models.Room.create(players=players, lobby_id=lobby_id)
 
 def connect(player_id: int, sid: int):
+    """
+    Connect player to online session
+
+    Inputs:
+
+    player_id:
+    sid: session id of socket connection
+    """
+
     sid_key = 'session:{}'.format(sid)
     if conn.exists(sid_key) or conn.sismember('online', player_id):
         return False
     else:
         conn.set(sid_key, player_id)
         conn.sadd('online', player_id)
-    is_online = conn.sismember('online', player_id)
-    if is_online:
+    if is_online(player_id):
         logger.log(DEBUG, 'Player {} now online'.format(player_id))
         return True
     else:
@@ -185,6 +227,15 @@ def is_online(player_id):
     return conn.sismember('online', player_id)
 
 def disconnect(sid: int):
+    """
+    Disconnect player to online session. 
+    All information regarding player will be deregistered from rooms and all data structures proposed
+
+    Inputs:
+
+    player_id:
+    sid: session id of socket connection
+    """
     player_id = conn.get('session:{}'.format(sid))
     if player_id is None:
         return
