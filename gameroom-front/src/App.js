@@ -28,10 +28,12 @@ class App extends Component {
     this.setUser = this.setUser.bind(this);
     this.register = this.register.bind(this);
     this.login = this.login.bind(this);
+    this.matching = this.matching.bind(this);
+    this.socket = null;
     this.state = {
       user: {},
-      component: <Login toRegister={this.toRegister} login={this.login}></Login>,
-      all_players: [],
+      component: <Login toRegister={this.toRegister} login={this.login} incorrect={false}></Login>,
+      room: {},
     }
     // this.state = {component: <MainMenu user={this.user} toNoti={this.toNoti}></MainMenu>};
   }
@@ -44,7 +46,7 @@ class App extends Component {
   register = (form_data) => {
     console.log(JSON.stringify(form_data))
     fetch('/api/player/create', {
-      method: "POST", 
+      method: "POST",
       headers: {
         'Content-Type': 'application/json'
       },
@@ -52,19 +54,19 @@ class App extends Component {
     })
       .then(res => res.json())
       .then((data) => {
-        if(data.error == undefined){
+        if (data.error == undefined) {
           this.login(form_data)
         }
-        else{
+        else {
           this.toRegister(true)
         }
-        
+
       })
   }
 
   login = (form_data) => {
     fetch('/api/auth/login', {
-      method: "POST", 
+      method: "POST",
       headers: {
         'Content-Type': 'application/json'
       },
@@ -72,31 +74,56 @@ class App extends Component {
     })
       .then(res => res.json())
       .then((data) => {
-        if(data)
-        this.setState({
-          user: data,
-        });
-        this.connectSocket()
-        this.toMainMenu();
+        console.log(data)
+        if (data.status == undefined) {
+          this.setState({
+            user: data,
+          });
+          this.socket = io(this.endpoint + '/connection');
+          this.socket.on('connect_callback', data => console.log(data))
+          this.toMainMenu();
+        }
+        else {
+          this.toLogin(true)
+        }
       })
   }
 
-  connectSocket = () => {
-    const socket = io(this.endpoint + '/connection');
-    socket.on('connect_callback', data => console.log(data))
+  matching = () => {
+    fetch('/api/lobby/list', {
+      method: 'GET', headers: {
+        'Content-Type': 'application/json'
+      },
+    }).then(res => res.json())
+    .then((data) => {
+      console.log(data)
+      let lobby_id = data[0].id;
+      console.log(this.socket)
+      this.socket.emit('match', {'lobby': lobby_id})
+      this.socket.on('match', (data) => {
+        this.setState({room: data.room})
+        console.log(this.state.room)
+        this.toLobby()
+      })
+    })
   }
+
 
 
 
   // __________________________________________________________ Transition_______________
+
+  toLobby = () => {
+    this.setState({component: <Lobby room={this.state.room} toRating={this.toRating}></Lobby>})
+  }
 
   toRegister = (exist) => {
     this.setState({ component: <Register toLogin={this.toLogin} register={this.register} exist={exist}></Register> });
     console.log("to register")
   }
 
-  toLogin = () => {
-    this.setState({ component: <Login toRegister={this.toRegister} login={this.login}></Login> })
+  toLogin = (incorrect) => {
+    this.setState({ component: <Login toRegister={this.toRegister} login={this.login} incorrect={incorrect}></Login> })
     console.log("to login")
   }
 
@@ -110,8 +137,8 @@ class App extends Component {
     this.setState({ component: <Rating players={players} toMainMenu={this.toMainMenu}></Rating> });
   }
 
-  toMainMenu(){
-    this.setState({component: <MainMenu all_players={this.state.all_players} user={this.state.user} toNoti={this.toNoti}></MainMenu>});
+  toMainMenu() {
+    this.setState({ component: <MainMenu matching = {this.matching} all_players={this.state.all_players} user={this.state.user} toNoti={this.toNoti}></MainMenu> });
   }
 
   render() {

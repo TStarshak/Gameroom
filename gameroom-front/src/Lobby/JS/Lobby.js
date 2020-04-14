@@ -8,26 +8,26 @@ class Lobby extends Component {
   constructor(props){
     super(props)
     this.state = {
-      users: [
-        {username: "Faker"},
-        {username: "Faker"},
-        {username: "Faker"},
-        {username: "Faker"},
-        {username: "Faker"},
-      ]
+      room: this.props.room
 
     }
     this.numPeople = props.numPeople;
+  }
+
+  handleClick = () => {
+    let tmp = this.state.room.players;
+    tmp.pop(0);
+    this.props.toRating(tmp)
   }
 
   render() {
     return (
       
       <div className='full Lobby'>
-        <Button className="end-session" variant="danger">End session</Button>
+        <Button className="end-session" variant="danger" onClick={this.handleClick}>End session</Button>
         <Row className='full'>
           <Col xs={3} className='' style={{ paddingRight: 0 }}>
-            <Sideboard users={this.state.users}></Sideboard>
+            <Sideboard users={this.state.room.players}></Sideboard>
           </Col>
           <Col xs={9} className='full ' style={{ paddingLeft: 0 }}>
             <ChatRoom className=''></ChatRoom>

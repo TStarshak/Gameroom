@@ -20,6 +20,12 @@ class Login extends Component {
     }
 
     render() {
+        let incorrect = null;
+        if (this.props.incorrect) {
+            incorrect = <Form.Text className="text-muted">
+                Login credential incorrect
+        </Form.Text>
+        }
         return (
             <div className="login">
                 <h1>Sign in</h1>
@@ -31,6 +37,7 @@ class Login extends Component {
                     <Form.Group controlId="formBasicPassword">
                         <Form.Label>Password</Form.Label>
                         <Form.Control name='password' type="password" placeholder="Password" onChange={this.onChange}/>
+                        {incorrect}
                     </Form.Group>
                     
                 </Form>

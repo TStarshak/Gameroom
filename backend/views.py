@@ -112,6 +112,7 @@ def match_player(data):
     if 'lobby' not in data:
         raise ConnectionRefusedError('Lobby missing or not exist')
     lobby_id = data['lobby']
+    print(lobby_id)
     # create new single room with player inside
     # players = [models.Player.get_by_id(player_id)]
     # room, status = models.Room.create(players=players, lobby_id=lobby_id)

@@ -41,7 +41,7 @@ import redis
 # redis_lobby = redis.StrictRedis(charset="utf-8",
 #                       decode_responses=True)
 app = create_app(Config)
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'mydatabase.db')
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
