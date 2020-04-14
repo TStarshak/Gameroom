@@ -46,7 +46,7 @@ socketio = SocketIO(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login_manager = LoginManager(app)
-cors = CORS(app)
+cors = CORS(app, supports_credentials=True)
 from backend import views, models
 # app = Flask(__name__)
 # bcrypt = Bcrypt(app)

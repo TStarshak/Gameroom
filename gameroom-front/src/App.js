@@ -14,7 +14,7 @@ import Register from './Authenticate/JS/Register';
 class App extends Component {
   constructor(props) {
     super(props);
-    this.endpoint = 'http://localhost:5000';
+    this.endpoint = 'localhost:5000';
     this.user = {
       profileIcon: "https://i.ibb.co/sg0q559/Featherknight-Summoner-Icon-TFT-Lo-L.jpg",
       name: 'Scarria1',
@@ -82,9 +82,8 @@ class App extends Component {
   }
 
   connectSocket = () => {
-    const socket = io( this.endpoint);
+    const socket = io(this.endpoint + '/connection');
     socket.on('connect_callback', data => console.log(data))
-
   }
 
 
