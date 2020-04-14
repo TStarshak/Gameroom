@@ -184,7 +184,7 @@ def leave_room(player_id: int):
     conn.hdel('inmatch', player_id)
     # conn.srem('room:{}'.format(room_id), player_id)
     data = json.loads(conn.hget('room',room_id))
-    if player_id in data['player_id']:
+    if player_id in data['player_ids']:
         data['player_ids'].remove(player_id)
     if len(data['player_ids']) == 0:
         conn.hdel('room', room_id)
