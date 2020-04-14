@@ -60,6 +60,7 @@ def login():
     username = data['username']
     password = data['password']
     player = models.Player.query.filter_by(username=username).first()
+    print(player.representation)
     if not player or not player.verify_password(password):
         return jsonify(status="Failed credentials")
     login_user(player)

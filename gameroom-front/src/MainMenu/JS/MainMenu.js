@@ -5,13 +5,14 @@ import StarRating from './StarRating';
 import ProfileIcon from './ProfileIcon'
 class MainMenu extends Component {
   render(){
+    console.log(this.props);
     return (
       <div className="MainMenu">
-        <ProfileIcon src="https://i.ibb.co/sg0q559/Featherknight-Summoner-Icon-TFT-Lo-L.jpg"></ProfileIcon>
-        <h1>{this.props.user.username}</h1>
-        <StarRating rating="4.3"></StarRating>
+        <ProfileIcon src={this.props.user.profileIcon}></ProfileIcon>
+        <h1>{this.props.user.name}</h1>
+        <StarRating rating={this.props.user.rating.toString()}></StarRating>
         
-        <Search all_players={this.props.all_players} user={this.props.user} toNoti={this.props.toNoti}></Search>
+        <Search toNoti={this.props.toNoti}></Search>
       </div>
       
     );

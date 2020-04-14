@@ -1,63 +1,123 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import MainMenu from './MainMenu/JS/MainMenu'
 import './App.css';
 import Notification from './MainMenu/JS/Notification';
 import Rating from './Lobby/JS/Rating';
+import Lobby from './Lobby/JS/Lobby';
+import Login from './Authenticate/JS/Login';
+import Register from './Authenticate/JS/Register';
 class App extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
-    // this.user = {
-    //   profileIcon: "https://i.ibb.co/sg0q559/Featherknight-Summoner-Icon-TFT-Lo-L.jpg",
-    //   username: 'Scarria1',
-    //   rating: 4.3
-    // }
-    this.user = {username:'scar'};
+    this.user = {
+      profileIcon: "https://i.ibb.co/sg0q559/Featherknight-Summoner-Icon-TFT-Lo-L.jpg",
+      name: 'Scarria1',
+      rating: 4.3
+    }
     this.toNoti = this.toNoti.bind(this);
     this.toRating = this.toRating.bind(this);
     this.toMainMenu = this.toMainMenu.bind(this);
-    this.state = {user:this.user, component: <MainMenu user={this.user} toNoti={this.toNoti}></MainMenu>};
-    fetch('/api/player/list', {method: "GET"})
-    .then(res=>res.json())
-    .then((data) => {
-      this.user = data[1];
-      this.setState({all_players: data,user:this.user, component: <MainMenu all_players={data} user={this.user} toNoti={this.toNoti}></MainMenu>});
+    this.toRegister = this.toRegister.bind(this);
+    this.toLogin = this.toLogin.bind(this);
+    this.setUser = this.setUser.bind(this);
+    this.register = this.register.bind(this);
+    this.login = this.login.bind(this);
+    this.state = {
+      user: {},
+      component: <Login toRegister={this.toRegister}></Login>,
+      users: []
+    }
+    // this.state = {component: <MainMenu user={this.user} toNoti={this.toNoti}></MainMenu>};
+  }
+  // ___________________________________________________ API call____________________________
+
+  setUser = (user) => {
+    this.setState({ user: user });
+  }
+
+  register = (form_data) => {
+    console.log(JSON.stringify(form_data))
+    fetch('/api/player/create', {
+      method: "POST", 
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(form_data),
     })
-
-    
+      .then(res => res.json())
+      .then((data) => {
+        if(data.error == undefined){
+          this.setState({
+            user: data,
+          });
+          this.toMainMenu();
+        }
+        else{
+          this.toRegister(true)
+        }
+        
+      })
   }
 
-  // componentDidMount(){
-  //   fetch('/api/player/list', {method: "GET"})
-  //   .then(res=>res.json())
-  //   .then((data) => {
-  //     this.user = data[1];
-  //     console.log(this.user);
-  //   })
-  // }
+  login = (form_data) => {
+    fetch('/api/auth/login', {
+      method: "POST", 
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(form_data),
+    })
+      .then(res => res.json())
+      .then((data) => {
+        this.setState({
+          user: data,
+        });
+        this.toMainMenu();
+      })
+  }
 
-  toNoti(players){
+
+
+  // __________________________________________________________ Transition_______________
+
+  toRegister = (exist) => {
+    this.setState({ component: <Register toLogin={this.toLogin} register={this.register} exist={exist}></Register> });
+    console.log("to register")
+  }
+
+  toLogin = () => {
+    this.setState({ component: <Login toRegister={this.toRegister}></Login> })
+    console.log("to login")
+  }
+
+  toNoti = (players) => {
     // console.log('to noti');
-    this.setState({component: <Notification user={this.state.user} players={players} toRating={this.toRating}></Notification>});
+    this.setState({ component: <Notification players={players} toRating={this.toRating}></Notification> });
+    console.log(this.state);
   }
 
-  toRating(players){
-    this.setState({component: <Rating user={this.state.user} players={players} toMainMenu={this.toMainMenu}></Rating>});
+  toRating = (players) => {
+    this.setState({ component: <Rating players={players} toMainMenu={this.toMainMenu}></Rating> });
   }
 
-  toMainMenu(){
-    this.setState({component: <MainMenu all_players={this.state.all_players} user={this.state.user} toNoti={this.toNoti}></MainMenu>});
+  toMainMenu = () => {
+    this.setState({ component: <MainMenu user={this.state.user} toNoti={this.toNoti}></MainMenu> });
   }
-  render(){
+
+  render() {
     return (
       <div className="App">
         {this.state.component}
+        {/* <Login></Login> */}
+        {/* <Lobby></Lobby> */}
+        {/* {this.state.component} */}
         {/* <Rating players= {[{name: 'Scarria1'},{name: 'Scarria2'},{name: 'Scarria3'},{name: 'Scarria4'},{name: 'Scarria5'}]}></Rating> */}
         {/* <Notification 
         players= {[{name: 'Scarria1'},{name: 'Scarria2'},{name: 'Scarria3'},{name: 'Scarria4'},{name: 'Scarria5'},{name: 'Scarria6'}]}
         ></Notification> */}
       </div>
     );
-    
+
   }
-} 
+}
 export default App;
