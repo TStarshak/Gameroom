@@ -109,9 +109,9 @@ def test_connection(app, client, mock_players):
     print(response.get_data(as_text=True))
     socket_client = socketio.test_client(app, flask_test_client=client)
     socket_client_attack = socketio.test_client(app, flask_test_client=app.test_client())
-    socket_client.connect(namespace=namespace, query_string='player=1')
+    socket_client.connect(namespace=namespace) # query_string='player=1')
     received = socket_client.get_received(namespace)
-    socket_client_attack.connect(namespace=namespace, query_string='player=1')
+    socket_client_attack.connect(namespace=namespace) # query_string='player=1')
     # assert not socket_client_attack.is_connected(namespace)
     print("Connection status returns")
     print(received)
@@ -129,7 +129,7 @@ def test_players_match(app, mock_players):
         client = clients[player.id]
         socket_clients[player.id] = socketio.test_client(app, flask_test_client=client)
         login_response = login(player, client)
-        socket_clients[player.id].connect(namespace=namespace, query_string='player={}'.format(player.id))
+        socket_clients[player.id].connect(namespace=namespace) # query_string='player={}'.format(player.id))
         response = client.post(
             '/api/room/create',
             data=json.dumps({'players': [player.id],
