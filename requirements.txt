@@ -11,3 +11,6 @@ rq
 redis
 flask-socketio
 flask-login
+pprint
+pytest-cov
+flask-cors
