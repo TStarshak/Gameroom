@@ -39,7 +39,7 @@ class Matchmaker:
         #             break
         start = time.time()
         player_id = get_room(single_room_id)['player_ids'][0]
-        while is_online(player_id):
+        while is_online(player_id) and size(single_room_id) == 1:
             for room_id in rooms(offset=offset, single_room_id=single_room_id):
                 if cls.match_quality(single_room_id, room_id) < fitness and time.time() - start > 30:
                     offset += offset * 0.5
@@ -100,7 +100,7 @@ def is_in_match(player_id: int):
     return conn.hexists('inmatch', player_id)
 
 def size(room):
-    return len(get_room(room)['player_ids'])
+    return len(get_room(room)['player_ids']) if get_room(room) else 0
 
 def append_rooms(room1_id: int, room2_id: int):
     data1 = json.loads(conn.hget('room',room1_id))
