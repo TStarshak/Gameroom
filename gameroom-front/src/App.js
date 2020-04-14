@@ -30,7 +30,7 @@ class App extends Component {
     this.login = this.login.bind(this);
     this.state = {
       user: {},
-      component: <Login toRegister={this.toRegister} login={this.login}></Login>,
+      component: <Login toRegister={this.toRegister} login={this.login} incorrect={false}></Login>,
       all_players: [],
     }
     // this.state = {component: <MainMenu user={this.user} toNoti={this.toNoti}></MainMenu>};
@@ -44,7 +44,7 @@ class App extends Component {
   register = (form_data) => {
     console.log(JSON.stringify(form_data))
     fetch('/api/player/create', {
-      method: "POST", 
+      method: "POST",
       headers: {
         'Content-Type': 'application/json'
       },
@@ -52,19 +52,19 @@ class App extends Component {
     })
       .then(res => res.json())
       .then((data) => {
-        if(data.error == undefined){
+        if (data.error == undefined) {
           this.login(form_data)
         }
-        else{
+        else {
           this.toRegister(true)
         }
-        
+
       })
   }
 
   login = (form_data) => {
     fetch('/api/auth/login', {
-      method: "POST", 
+      method: "POST",
       headers: {
         'Content-Type': 'application/json'
       },
@@ -72,19 +72,21 @@ class App extends Component {
     })
       .then(res => res.json())
       .then((data) => {
-        if(data)
-        this.setState({
-          user: data,
-        });
-        this.connectSocket()
-        this.toMainMenu();
+        console.log(data)
+        if (data.status == undefined) {
+          this.setState({
+            user: data,
+          });
+          const socket = io(this.endpoint + '/connection', { query: 'player=' + this.state.user.id });
+          socket.on('connect_callback', data => console.log(data))
+          this.toMainMenu();
+        }
+        else {
+          this.toLogin(true)
+        }
       })
   }
 
-  connectSocket = () => {
-    const socket = io(this.endpoint + '/connection');
-    socket.on('connect_callback', data => console.log(data))
-  }
 
 
 
@@ -95,8 +97,8 @@ class App extends Component {
     console.log("to register")
   }
 
-  toLogin = () => {
-    this.setState({ component: <Login toRegister={this.toRegister} login={this.login}></Login> })
+  toLogin = (incorrect) => {
+    this.setState({ component: <Login toRegister={this.toRegister} login={this.login} incorrect={incorrect}></Login> })
     console.log("to login")
   }
 
@@ -110,8 +112,8 @@ class App extends Component {
     this.setState({ component: <Rating players={players} toMainMenu={this.toMainMenu}></Rating> });
   }
 
-  toMainMenu(){
-    this.setState({component: <MainMenu all_players={this.state.all_players} user={this.state.user} toNoti={this.toNoti}></MainMenu>});
+  toMainMenu() {
+    this.setState({ component: <MainMenu all_players={this.state.all_players} user={this.state.user} toNoti={this.toNoti}></MainMenu> });
   }
 
   render() {
