@@ -6,7 +6,7 @@ import json
 from flask_sqlalchemy import SQLAlchemy
 
 from backend import app as _app, db as _db, models, socketio
-from backend.mock_models import Room, Player, RATING_MAX, RATING_MIN
+from backend.models import Room, Player, RATING_MAX, RATING_MIN
 from config import TestConfig, TESTDB, TESTDB_PATH
 import datetime
 import random

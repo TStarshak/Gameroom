@@ -105,31 +105,6 @@ class Room(db.Model, ModelMixin):
         }
 
     
-    def append(self, player: Union[int, Player]):
-        warnings.warn("Experimental")
-        if type(player) is int:
-            player = Player.get_by_id(player)
-        if len(self.players) < Lobby.get_by_id(self.lobby_id).cap:
-            self.players.append(player)
-            _, status = self._commit_changes(self, "Failed to modify room")
-            if status is None:
-                return True
-        return False
-    
-    def add(self, room: Union[int, "Room"]):
-        warnings.warn("Experimental")
-        if type(room) is int:
-            room = self.get_by_id(room)
-        lobby = Lobby.get_by_id(self.lobby_id)
-        cap = lobby.cap
-        if self.lobby_id == room.lobby_id and len(self.players) + len(room.players) < cap:
-            self.players += room.players
-            Room.query.delete(room)
-            _, status = self._commit_changes(self, "Failed to modify room")
-            if status is None:
-                return True
-        return False
-
     @property
     def rating(self):
         return mean([player.rating for player in self.players])

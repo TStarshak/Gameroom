@@ -1,6 +1,6 @@
 from backend import app, models, conn, logger
 from backend.models import RATING_MAX, RATING_MIN
-from backend.matchmaker import Matchmaker
+##from backend.matchmaker import Matchmaker
 from typing import Iterator, Union, List
 from logging import DEBUG
 from statistics import variance, mean
