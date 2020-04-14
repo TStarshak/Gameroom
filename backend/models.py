@@ -2,6 +2,10 @@ from backend import db
 import datetime
 import math
 from statistics import mean
+from typing import Union
+from flask_login import UserMixin
+from werkzeug.security import safe_str_cmp
+import warnings
 
 RATING_MAX = 1000
 RATING_MIN = 0
@@ -15,13 +19,17 @@ class ModelMixin(object):
     def create(cls, **kw):
         obj = cls(**kw)
         db.session.add(obj)
+        return cls._commit_changes(obj, fail_msg="Failed to create object")
+    
+    @classmethod
+    def _commit_changes(cls, obj, fail_msg):
         try:
             db.session.commit()
             return obj, None
         except Exception as e:
             db.session.rollback()
             db.session.flush()
-            return None, "Failed to create object"
+            return None, fail_msg
 
 
     @classmethod
@@ -33,7 +41,7 @@ class ModelMixin(object):
 
 
 
-class Player (db.Model, ModelMixin):
+class Player (db.Model, ModelMixin, UserMixin):
     __tablename__ = 'player'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(40), unique=True)
@@ -43,6 +51,9 @@ class Player (db.Model, ModelMixin):
     skill = db.Column(db.Integer, default=RATING_DEFAULT)
     num_evals = db.Column(db.Integer, default=1)
     room_id = db.Column(db.Integer, db.ForeignKey('room.id'))
+
+    def verify_password(self, password):
+        return safe_str_cmp(password, self.password)
 
     @classmethod
     def update_rating(cls, id: int, toxic_rates: int, skill_rates: int):
@@ -86,8 +97,38 @@ class Room(db.Model, ModelMixin):
             "timestamp" : self.timestamp,
             "lobby_id" : self.lobby_id,
             "players" : [player.representation for player in self.players],
-            "rating" : mean([player.rating for player in self.players])
+            "rating" : self.rating
         }
+
+    
+    def append(self, player: Union[int, Player]):
+        warnings.warn("Experimental")
+        if type(player) is int:
+            player = Player.get_by_id(player)
+        if len(self.players) < Lobby.get_by_id(self.lobby_id).cap:
+            self.players.append(player)
+            _, status = self._commit_changes(self, "Failed to modify room")
+            if status is None:
+                return True
+        return False
+    
+    def add(self, room: Union[int, "Room"]):
+        warnings.warn("Experimental")
+        if type(room) is int:
+            room = self.get_by_id(room)
+        lobby = Lobby.get_by_id(self.lobby_id)
+        cap = lobby.cap
+        if self.lobby_id == room.lobby_id and len(self.players) + len(room.players) < cap:
+            self.players += room.players
+            Room.query.delete(room)
+            _, status = self._commit_changes(self, "Failed to modify room")
+            if status is None:
+                return True
+        return False
+
+    @property
+    def rating(self):
+        return mean([player.rating for player in self.players])
 
 class Lobby (db.Model, ModelMixin):
     __tablename__ = 'lobby'
