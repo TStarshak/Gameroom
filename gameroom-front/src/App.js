@@ -46,10 +46,16 @@ class App extends Component {
     })
       .then(res => res.json())
       .then((data) => {
-        this.setState({
-          user: data,
-        });
-        this.toMainMenu();
+        if(data.error == undefined){
+          this.setState({
+            user: data,
+          });
+          this.toMainMenu();
+        }
+        else{
+          this.toRegister(true)
+        }
+        
       })
   }
 
@@ -74,8 +80,8 @@ class App extends Component {
 
   // __________________________________________________________ Transition_______________
 
-  toRegister = () => {
-    this.setState({ component: <Register toLogin={this.toLogin} register={this.register}></Register> });
+  toRegister = (exist) => {
+    this.setState({ component: <Register toLogin={this.toLogin} register={this.register} exist={exist}></Register> });
     console.log("to register")
   }
 

@@ -37,7 +37,7 @@ class Login extends Component {
                 <Button variant="primary" onClick={this.onSubmit}>
                         Submit
                     </Button>
-                    <Button variant="secondary" onClick={this.props.toRegister}>
+                    <Button variant="secondary" onClick={()=>{this.props.toRegister(false)}}>
                         Register
                     </Button>
             </div>

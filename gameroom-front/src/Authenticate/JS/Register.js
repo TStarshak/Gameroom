@@ -22,6 +22,12 @@ class Register extends Component {
     }
 
     render() {
+        let exist = null;
+        if (this.props.exist) {
+            exist = <Form.Text className="text-muted">
+                Your username already existed.
+        </Form.Text>
+        }
         return (
             <div className="login">
                 <h1>Register</h1>
@@ -33,7 +39,9 @@ class Register extends Component {
                     <Form.Group controlId="formBasicUsername">
                         <Form.Label>Username</Form.Label>
                         <Form.Control name='username' type="text" placeholder="Enter username" onChange={this.onChange} />
+                        {exist}
                     </Form.Group>
+
                     <Form.Group controlId="formBasicPassword">
                         <Form.Label>Password</Form.Label>
                         <Form.Control name='password' type="password" placeholder="Password" onChange={this.onChange} />
