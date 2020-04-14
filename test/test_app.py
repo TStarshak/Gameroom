@@ -72,6 +72,26 @@ def test_room_create(client):
     assert [player['id'] for player in room['players']] == [2]
 
 @pytest.mark.skipif(not is_redis_available(conn), reason="redis instance is not available")
+def test_room_existed(client):
+    """Create a new room with single participant already in a match"""
+    response = client.post(
+        '/api/room/create',
+        data=json.dumps({'players': [2],
+                         'lobby' : 1}),
+        content_type='application/json'
+    )
+    response = client.post(
+        '/api/room/create',
+        data=json.dumps({'players': [2],
+                         'lobby' : 1}),
+        content_type='application/json'
+    )
+    status = json.loads(response.get_data(as_text=True))
+    print(status)
+
+    assert status['status'] == 'Player 2 is already in a match'
+
+@pytest.mark.skipif(not is_redis_available(conn), reason="redis instance is not available")
 def test_room_json(client):
     """Test with a blank database."""
     response = client.get(

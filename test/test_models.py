@@ -4,29 +4,6 @@ import datetime
 import random
 import backend.lobby as L1
 
-@pytest.fixture(scope='session')
-def app(request):
-    _app.config.from_object(TestConfig)
-    ctx = _app.app_context()
-    ctx.push()
-    def teardown():
-        ctx.pop()
-    request.addfinalizer(teardown)
-    return _app
-
-@pytest.fixture(scope='session')
-def db(app, request):
-    if os.path.exists(TESTDB_PATH):
-        os.unlink(TESTDB_PATH)
-    def teardown():
-        _db.drop_all()
-        os.unlink(TESTDB_PATH)
-    _db.init_app(app)
-    _db.create_all()
-    configure(app, _db, request)
-    print(_db.engine.table_names())
-    request.addfinalizer(teardown)
-    return _db
     
 class TestPlayer:
     def populate():
@@ -73,13 +50,13 @@ class TestLobby:
         print(lobby.representation)
         
     def test_join(self):
-        room = Room(id = 1, players = [Player.get_by_id(1), Player.get_by_id(2)])
-        L1.join_room(player_id = 3, room_id = 1)
-        assert L1.size(1) == 3
+        room = L1.create_room(lobby_id = 1, player_ids = [1,2])
+        L1.join_room(player_id = 3, room_id = room.get('id'))
+        assert L1.size(room.get('id')) == 3
     
     def test_append(self):
-        room = Room(id = 1, players = [Player.get_by_id(1), Player.get_by_id(2)])
-        room2 = Room(id = 2, players = [Player.get_by_id(3), Player.get_by_id(4)])
-        L1.append_room(room1_id = 1, room2_id = 2)
-        assert L1.size(1) == 3
+        room = L1.create_room(lobby_id = 1, player_ids = [1,2])
+        room2 = L1.create_room(lobby_id = 1, player_ids = [3,4])
+        L1.append_rooms(room1_id = room.get('id'), room2_id = room2.get('id'))
+        assert L1.size(room.get('id')) ==4
         
