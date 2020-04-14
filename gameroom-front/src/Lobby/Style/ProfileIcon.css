@@ -1,8 +1,11 @@
 img {
-    margin: 10px auto;
+    margin: 10px auto;   
+    border-radius: 50%;
+}
+
+.medium{
     height: 150px;
     width: 150px;
-    border-radius: 50%;
-    border: 10px black solid;
+    margin: 10px auto;
 }
 

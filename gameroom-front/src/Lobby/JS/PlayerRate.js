@@ -46,7 +46,7 @@ class PlayerRate extends Component {
         return (
             <div className="PlayerRate">
                 <ProfileIcon></ProfileIcon>
-                <h1>{this.props.player.username}</h1>
+                <h1>{this.props.player.name}</h1>
                 <Popup trigger={<Button variant='info'>Rate</Button>} position='bottom center'>
                     {popupElements}
 
