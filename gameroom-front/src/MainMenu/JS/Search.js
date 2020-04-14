@@ -6,26 +6,26 @@ class Search extends Component {
 
     
     formHandler(user,toNoti, all_players) {
-        console.log(user)
         let tmp = {player: this.props.user.id}
-        console.log(JSON.stringify(tmp))
-        fetch('/api/server/match', {
-            method:'POST',
-            headers: {
-                'Content-Type' : 'application/json'
-            },
-            body: JSON.stringify(tmp),
-        })
-        .then(res=>res.json())
-        .then((data) => {
-            let players_ids = data.players;
-            players_ids.push(user.id);
-            toNoti(players_ids);
-            console.log(players_ids)
-            let players = players_ids.map((value)=>{return all_players[value - 1]})
-            console.log(players);
-            toNoti(players);
-        });
+        this.props.matching()
+        // console.log(JSON.stringify(tmp))
+        // fetch('/api/server/match', {
+        //     method:'POST',
+        //     headers: {
+        //         'Content-Type' : 'application/json'
+        //     },
+        //     body: JSON.stringify(tmp),
+        // })
+        // .then(res=>res.json())
+        // .then((data) => {
+        //     let players_ids = data.players;
+        //     players_ids.push(user.id);
+        //     toNoti(players_ids);
+        //     console.log(players_ids)
+        //     let players = players_ids.map((value)=>{return all_players[value - 1]})
+        //     console.log(players);
+        //     toNoti(players);
+        // });
        }
     
     render() {

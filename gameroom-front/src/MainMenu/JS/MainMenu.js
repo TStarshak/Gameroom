@@ -14,7 +14,7 @@ class MainMenu extends Component {
         <h1>{this.props.user.username}</h1>
         <h2>Rating: {this.props.user.rating}</h2>
         
-        <Search all_players={this.props.all_players} user={this.props.user} toNoti={this.props.toNoti}></Search>
+        <Search matching = {this.props.matching} all_players={this.props.all_players} user={this.props.user} toNoti={this.props.toNoti}></Search>
       </div>
       
     );

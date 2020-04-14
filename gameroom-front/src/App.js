@@ -28,6 +28,8 @@ class App extends Component {
     this.setUser = this.setUser.bind(this);
     this.register = this.register.bind(this);
     this.login = this.login.bind(this);
+    this.matching = this.matching.bind(this);
+    this.socket = null;
     this.state = {
       user: {},
       component: <Login toRegister={this.toRegister} login={this.login} incorrect={false}></Login>,
@@ -77,14 +79,30 @@ class App extends Component {
           this.setState({
             user: data,
           });
-          const socket = io(this.endpoint + '/connection', { query: 'player=' + this.state.user.id });
-          socket.on('connect_callback', data => console.log(data))
+          this.socket = io(this.endpoint + '/connection');
+          this.socket.on('connect_callback', data => console.log(data))
           this.toMainMenu();
         }
         else {
           this.toLogin(true)
         }
       })
+  }
+
+  matching = () => {
+    fetch('/api/lobby/list', {
+      method: 'GET', headers: {
+        'Content-Type': 'application/json'
+      },
+    }).then(res => res.json())
+    .then((data) => {
+      console.log(data)
+      let lobby_id = data[0].id;
+      console.log(this.socket)
+
+      this.socket.emit('match', {'lobby': lobby_id})
+      this.socket.on('match', data => console.log(data))
+    })
   }
 
 
@@ -113,7 +131,7 @@ class App extends Component {
   }
 
   toMainMenu() {
-    this.setState({ component: <MainMenu all_players={this.state.all_players} user={this.state.user} toNoti={this.toNoti}></MainMenu> });
+    this.setState({ component: <MainMenu matching = {this.matching} all_players={this.state.all_players} user={this.state.user} toNoti={this.toNoti}></MainMenu> });
   }
 
   render() {
