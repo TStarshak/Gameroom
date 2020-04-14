@@ -165,6 +165,8 @@ def update_rating(player_id):
     data = request.get_json()
     toxic = data.get('toxic')
     skill = data.get('skill')
+    if toxic is None or skill is None:
+        return jsonify(status="Missing args")
     models.Player.update_rating(player_id, toxic, skill)
     return jsonify(models.Player.get_by_id(player_id).representation)
 

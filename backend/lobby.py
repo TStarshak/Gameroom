@@ -107,6 +107,8 @@ def append_rooms(room1_id: int, room2_id: int):
     assert data1['lobby_id'] == data2['lobby_id']
     data1['player_ids'] += data2['player_ids']
     conn.hdel('room', room2_id)
+    for player_id in data2['player_ids']:
+        conn.hdel('inmatch', player_id)
     conn.hset('room', room1_id, json.dumps(data1))
 
 def rating(room_id: int):
@@ -154,6 +156,8 @@ def create_room(player_ids: Union[int, List] , lobby_id: int):
         'lobby_id' : lobby_id,
         'player_ids' : player_ids
     }
+    for player_id in player_ids:
+        conn.hset('inmatch', player_id, room_id)
     conn.hset('room', room_id, json.dumps(data))
     return get_room(room_id, include_player_info=True)
 
@@ -183,6 +187,7 @@ def leave_room(player_id: int):
         return
     conn.hdel('inmatch', player_id)
     # conn.srem('room:{}'.format(room_id), player_id)
+    logger.debug("{}, {}".format(player_id, conn.hget('room',room_id)))
     data = json.loads(conn.hget('room',room_id))
     if player_id in data['player_ids']:
         data['player_ids'].remove(player_id)
@@ -190,7 +195,7 @@ def leave_room(player_id: int):
         conn.hdel('room', room_id)
     else:
         conn.hset('room', room_id, json.dumps(data))
-    logger.info(DEBUG, 'Room id {} now with players {}'.format(room_id, data['player_ids']))
+    logger.log(DEBUG, 'Room id {} now with players {}'.format(room_id, data['player_ids']))
 
 def save_room(room_id: int):
     """
