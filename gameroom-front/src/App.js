@@ -99,9 +99,10 @@ class App extends Component {
       console.log(data)
       let lobby_id = data[0].id;
       console.log(this.socket)
-
       this.socket.emit('match', {'lobby': lobby_id})
-      this.socket.on('match', data => console.log(data))
+      this.socket.on('match', (data) => {
+        console.log(data)
+      })
     })
   }
 
