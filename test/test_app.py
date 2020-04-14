@@ -105,6 +105,18 @@ def test_player_json(client):
     assert player['username'] == 'Randomplayer1'
 
 
+def test_login(client):
+    
+    response = client.post(
+        '/api/auth/login',
+         data=json.dumps({'username': 'Randomplayer1', 'password': 'Rand1'}),
+        content_type='application/json'
+    )
+
+    data = json.loads(response.get_data(as_text=True))
+    print(data)
+    assert response.status_code == 200
+
 def test_room_create(client):
     """Create a new room with single participant"""
     response = client.post(
@@ -161,3 +173,27 @@ def test_rating_update(client):
     assert player['id'] == 1
     assert RATING_MIN <= player['rating'] <= RATING_MAX
     assert player['num_evals'] == 2
+
+def test_player_create(client):
+    response = client.post(
+        '/api/player/create',
+         data=json.dumps({'username': 'Randomplayer9', 'password': 'Rand9', 'email': 'Rando9@somewhere.somehow'}),
+        content_type='application/json'
+    )
+    print(response.get_data(as_text=True))
+    assert response.status_code == 200
+    player = json.loads(response.get_data(as_text=True))
+    assert player['username'] == 'Randomplayer9'
+    assert player['email'] == 'Rando9@somewhere.somehow'
+    
+def test_player_create_int(client):
+    response = client.post(
+        '/api/player/create',
+         data=json.dumps({'username': 22, 'password': 22, 'email': 22}),
+        content_type='application/json'
+    )
+    print(response.get_data(as_text=True))
+    assert response.status_code == 200
+    player = json.loads(response.get_data(as_text=True))
+    assert player['username'] == '22'
+    assert player['email'] == '22'
