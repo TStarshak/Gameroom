@@ -63,7 +63,8 @@ class Matchmaker:
             return abs(rating(match_room_id) - rating(room))/(RATING_MAX - RATING_MIN)  
         def var_rating(match_room_id, room):
             avg = (rating(room) * size(room) + rating(match_room_id))/(size(room) + size(match_room_id))
-            players = [get_room(room)['player_ids']] + [get_room(match_room_id)['player_ids']]
+            players = get_room(room)['player_ids'] + get_room(match_room_id)['player_ids']
+            logger.debug(players)
             return variance([models.Player.get_by_id(player).rating for player in players])/((RATING_MAX - avg)*(avg - RATING_MIN))
         return 1.0 - ((2/3)*diff_rating(match_room_id, room_id) + (1/3)*var_rating(match_room_id, room_id))
     
@@ -148,8 +149,8 @@ def create_room(player_ids: Union[int, List] , lobby_id: int):
     Create and save room
     Returns: dict of new room created
     """
-    if isinstance(player_ids, int):
-        player_ids = [player_ids]
+    if not isinstance(player_ids, list):
+        player_ids = [int(player_id) for player_id in player_ids]
     room_id = new_ID()
     data = {
         'id' : room_id,
