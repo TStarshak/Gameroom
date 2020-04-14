@@ -7,6 +7,7 @@ from flask_redis import FlaskRedis
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
+from flask_login import LoginManager
 from config import Config
 import os
 import logging
@@ -43,6 +44,7 @@ socketio = SocketIO(app)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'mydatabase.db')
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+login_manager = LoginManager(app)
 from backend import views, models
 # app = Flask(__name__)
 # bcrypt = Bcrypt(app)
@@ -57,6 +59,6 @@ from backend import views, models
 # login_manager.login_view = "users.login"
 
 
-# @login_manager.user_loader
-# def load_user(user_id):
-#     return Player.query.filter(Player.id == int(user_id)).first()
+@login_manager.user_loader
+def load_user(user_id):
+    return models.Player.get_by_id(user_id)
