@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import io from 'socket.io-client';
+
 import MainMenu from './MainMenu/JS/MainMenu'
 import './App.css';
 import Notification from './MainMenu/JS/Notification';
@@ -6,9 +8,13 @@ import Rating from './Lobby/JS/Rating';
 import Lobby from './Lobby/JS/Lobby';
 import Login from './Authenticate/JS/Login';
 import Register from './Authenticate/JS/Register';
+
+
+
 class App extends Component {
   constructor(props) {
     super(props);
+    this.endpoint = 'http://localhost:5000';
     this.user = {
       profileIcon: "https://i.ibb.co/sg0q559/Featherknight-Summoner-Icon-TFT-Lo-L.jpg",
       name: 'Scarria1',
@@ -47,10 +53,7 @@ class App extends Component {
       .then(res => res.json())
       .then((data) => {
         if(data.error == undefined){
-          this.setState({
-            user: data,
-          });
-          this.toMainMenu();
+          this.login(form_data)
         }
         else{
           this.toRegister(true)
@@ -73,12 +76,15 @@ class App extends Component {
         this.setState({
           user: data,
         });
+        this.connectSocket()
         this.toMainMenu();
       })
   }
 
-  setUser = (username) {
-    fetch('/api/platy')
+  connectSocket = () => {
+    const socket = io( this.endpoint);
+    socket.on('connect_callback', data => console.log(data))
+
   }
 
 
