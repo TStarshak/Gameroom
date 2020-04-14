@@ -33,7 +33,7 @@ class App extends Component {
     this.state = {
       user: {},
       component: <Login toRegister={this.toRegister} login={this.login} incorrect={false}></Login>,
-      all_players: [],
+      room: {},
     }
     // this.state = {component: <MainMenu user={this.user} toNoti={this.toNoti}></MainMenu>};
   }
@@ -101,7 +101,9 @@ class App extends Component {
       console.log(this.socket)
       this.socket.emit('match', {'lobby': lobby_id})
       this.socket.on('match', (data) => {
-        console.log(data)
+        this.setState({room: data.room})
+        console.log(this.state.room)
+        this.toLobby()
       })
     })
   }
@@ -110,6 +112,10 @@ class App extends Component {
 
 
   // __________________________________________________________ Transition_______________
+
+  toLobby = () => {
+    this.setState({component: <Lobby room={this.state.room} toRating={this.toRating}></Lobby>})
+  }
 
   toRegister = (exist) => {
     this.setState({ component: <Register toLogin={this.toLogin} register={this.register} exist={exist}></Register> });
