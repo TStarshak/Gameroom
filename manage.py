@@ -1,7 +1,7 @@
 from flask_script import Manager
 import random
 import datetime
-from backend.mock_models import Room, Player, RATING_MAX, RATING_MIN
+# from backend.mock_models import Room, Player, RATING_MAX, RATING_MIN
 from backend import app, models
 
 manager = Manager(app)

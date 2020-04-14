@@ -64,7 +64,7 @@ def login():
     if not player or not player.verify_password(password):
         return jsonify(status="Failed credentials")
     login_user(player)
-    return jsonify(status="{} logged in".format(username))
+    return jsonify(player.representation)
 
 @app.route("/api/auth/logout", methods=["GET", "POST"])
 @login_required
@@ -102,6 +102,7 @@ def create_room():
     # return jsonify(room.representation)
 
 @socketio.on('match', '/connection')
+@authenticated_only
 def match_player(data):
     player_id = data['player']
     lobby_id = data['lobby']
@@ -119,6 +120,7 @@ def match_player(data):
     # Match: create new room -> matching algo -- matched room w our player not inside --> adding ---> remove old room
 
 @app.route("/api/room/list", methods=["GET"])
+@login_required
 def list_rooms():
     if current_user.is_authenticated:
         offset = request.get_json().get('offset')

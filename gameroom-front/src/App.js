@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import io from 'socket.io-client';
+
 import MainMenu from './MainMenu/JS/MainMenu'
 import './App.css';
 import Notification from './MainMenu/JS/Notification';
@@ -6,9 +8,13 @@ import Rating from './Lobby/JS/Rating';
 import Lobby from './Lobby/JS/Lobby';
 import Login from './Authenticate/JS/Login';
 import Register from './Authenticate/JS/Register';
+
+
+
 class App extends Component {
   constructor(props) {
     super(props);
+    this.endpoint = 'localhost:5000';
     this.user = {
       profileIcon: "https://i.ibb.co/sg0q559/Featherknight-Summoner-Icon-TFT-Lo-L.jpg",
       name: 'Scarria1',
@@ -24,8 +30,8 @@ class App extends Component {
     this.login = this.login.bind(this);
     this.state = {
       user: {},
-      component: <Login toRegister={this.toRegister}></Login>,
-      users: []
+      component: <Login toRegister={this.toRegister} login={this.login}></Login>,
+      all_players: [],
     }
     // this.state = {component: <MainMenu user={this.user} toNoti={this.toNoti}></MainMenu>};
   }
@@ -47,10 +53,7 @@ class App extends Component {
       .then(res => res.json())
       .then((data) => {
         if(data.error == undefined){
-          this.setState({
-            user: data,
-          });
-          this.toMainMenu();
+          this.login(form_data)
         }
         else{
           this.toRegister(true)
@@ -69,11 +72,18 @@ class App extends Component {
     })
       .then(res => res.json())
       .then((data) => {
+        if(data)
         this.setState({
           user: data,
         });
+        this.connectSocket()
         this.toMainMenu();
       })
+  }
+
+  connectSocket = () => {
+    const socket = io(this.endpoint + '/connection');
+    socket.on('connect_callback', data => console.log(data))
   }
 
 
@@ -86,7 +96,7 @@ class App extends Component {
   }
 
   toLogin = () => {
-    this.setState({ component: <Login toRegister={this.toRegister}></Login> })
+    this.setState({ component: <Login toRegister={this.toRegister} login={this.login}></Login> })
     console.log("to login")
   }
 
@@ -100,8 +110,8 @@ class App extends Component {
     this.setState({ component: <Rating players={players} toMainMenu={this.toMainMenu}></Rating> });
   }
 
-  toMainMenu = () => {
-    this.setState({ component: <MainMenu user={this.state.user} toNoti={this.toNoti}></MainMenu> });
+  toMainMenu(){
+    this.setState({component: <MainMenu all_players={this.state.all_players} user={this.state.user} toNoti={this.toNoti}></MainMenu>});
   }
 
   render() {

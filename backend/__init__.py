@@ -36,6 +36,7 @@ from rq import Queue
 from rq.job import Job
 from worker import conn
 from flask_socketio import SocketIO
+from flask_cors import CORS
 import redis
 # redis_lobby = redis.StrictRedis(charset="utf-8",
 #                       decode_responses=True)
@@ -45,6 +46,7 @@ socketio = SocketIO(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login_manager = LoginManager(app)
+cors = CORS(app, supports_credentials=True)
 from backend import views, models
 # app = Flask(__name__)
 # bcrypt = Bcrypt(app)
