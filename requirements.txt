@@ -11,3 +11,4 @@ rq
 redis
 flask-socketio
 flask-login
+pprint
