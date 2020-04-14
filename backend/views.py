@@ -54,6 +54,10 @@ def create_player():
 def list_players():
     return jsonify(list(map(lambda player: player.representation, models.Player.query.all())))
 
+@app.route("/api/lobby/list", methods=["GET"])
+def list_lobbies():
+    return jsonify(list(map(lambda lobby: lobby.representation, models.Lobby.query.all())))
+
 @app.route("/api/auth/login", methods=["POST"])
 def login():
     data = request.get_json()
@@ -104,7 +108,9 @@ def create_room():
 @socketio.on('match', '/connection')
 @authenticated_only
 def match_player(data):
-    player_id = data['player']
+    player_id = current_user.get_id()
+    if 'lobby' not in data:
+        raise ConnectionRefusedError('Lobby missing or not exist')
     lobby_id = data['lobby']
     # create new single room with player inside
     # players = [models.Player.get_by_id(player_id)]
@@ -165,9 +171,10 @@ def update_rating(player_id):
 @socketio.on('connect', '/connection')
 @authenticated_only
 def connect_player():
-    player_id = request.args.get('player', type=int)
+    # player_id = request.args.get('player', type=int)
     # print(player_id)
     # print(request.sid)
+    player_id = current_user.get_id()
     sid = request.sid
     if is_online(player_id):
         logger.debug('Player {} already online'.format(player_id))

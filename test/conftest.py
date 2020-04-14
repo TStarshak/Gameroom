@@ -4,6 +4,7 @@ import tempfile
 import pytest
 import json
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import OperationalError
 
 from backend import app as _app, db as _db, models, socketio
 from backend.models import Room, Player, RATING_MAX, RATING_MIN
@@ -51,7 +52,11 @@ def db(app, request):
     if os.path.exists(TESTDB_PATH):
         os.unlink(TESTDB_PATH)
     def teardown():
-        _db.drop_all()
+        try:
+            _db.drop_all()
+        except OperationalError:
+            # db is locked, still being accessed, will attempt to remove all
+            pass
         conn.shutdown(nosave=True)
         os.unlink(TESTDB_PATH)
     _db.init_app(app)
