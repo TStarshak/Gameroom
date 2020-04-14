@@ -115,7 +115,7 @@ def rating(room_id: int):
     rating = mean([models.Player.get_by_id(player_id).rating for player_id in player_ids])
     return rating
 
-def rooms(offset=None, single_room_id=None) -> Iterator:
+def rooms(offset=None, single_room_id=None, player_id=None) -> Iterator:
     '''
     Get all online rooms in an iterator
 
@@ -123,13 +123,17 @@ def rooms(offset=None, single_room_id=None) -> Iterator:
     offset: offset values from given single_room_id and rooms found between 0 and 1 (no diff -> whole range diff)
     single_room_id: id of room to be matched, should contain one single player
     '''
-    assert (offset is None and single_room_id is None) or all([offset, single_room_id])
+    assert (offset is None and single_room_id is None) or (offset and any([single_room_id, player_id]))
     assert offset is None or 0 <= offset <= 1
+    rate = None
+    if single_room_id is not None:
+        rate = rating(single_room_id)
+    elif player_id is not None and is_online(player_id):
+        rate = models.Player.get_by_id(player_id).rating
     offset = offset or float('inf')
     for room in conn.hkeys('room'):
-        if single_room_id is not None:
-            if abs(rating(single_room_id) - rating(room)) > offset*(RATING_MAX - RATING_MIN):
-                continue
+        if rate and abs(rate - rating(room)) > offset*(RATING_MAX - RATING_MIN):
+            continue
         yield room
 
 def new_ID():

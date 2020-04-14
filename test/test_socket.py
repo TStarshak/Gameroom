@@ -153,6 +153,29 @@ def test_players_match(app):
         logout(client)
         assert not socket_client.is_connected(namespace)
 
+def test_room_list(app, client):
+    namespace = '/connection'
+    global mock_players
+    clients = {}
+    socket_clients = {}
+    for player in mock_players.values():
+        clients[player.id] = app.test_client()
+        client = clients[player.id]
+        socket_clients[player.id] = socketio.test_client(app, flask_test_client=client)
+        login_response = login(player, client)
+        socket_clients[player.id].connect(namespace=namespace, query_string='player={}'.format(player.id))
+    player = random.choice(list(mock_players.values()))
+    client = clients[player.id]
+    player_client = socket_clients[player.id]
+    response = client.get(
+        '/api/room/list',
+        data=json.dumps({
+            'offset': 0.2
+        }),
+        content_type='application/json'
+    )
+    print(json.loads(response.get_data(as_text=True)))
+
 
 
 

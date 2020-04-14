@@ -60,7 +60,7 @@ def login():
     username = data['username']
     password = data['password']
     player = models.Player.query.filter_by(username=username).first()
-    print(player.representation)
+    # print(player.representation)
     if not player or not player.verify_password(password):
         return jsonify(status="Failed credentials")
     login_user(player)
@@ -83,7 +83,7 @@ def create_room():
     """
     player_ids = request.get_json().get('players')
     lobby_id = request.get_json().get('lobby')
-    print(lobby_id)
+    # print(lobby_id)
     # print(players)
     # room_id = random.randint(1, 100)
     # room = Room(room_id, datetime.datetime.now(),
@@ -91,6 +91,11 @@ def create_room():
     # players = [models.Player.get_by_id(player_id) for player_id in player_ids]
     # print(players)
     # room, status = models.Room.create(players=players, lobby_id=lobby_id)
+    if not player_ids or not lobby_id:
+        return jsonify(status="Missing or invalid argument")
+    for player_id in player_ids:
+        if is_in_match(player_id):
+            return jsonify(status="Player {} is already in a match".format(player_id))
     return jsonify(lobby.create_room(player_ids, lobby_id))
     # if room is None:
     #     return json.dumps({"error": status}), 500
@@ -112,6 +117,17 @@ def match_player(data):
     socketio.emit('match', {'room': new_room_info}, namespace='/connection')
     #Deregister old room? How?
     # Match: create new room -> matching algo -- matched room w our player not inside --> adding ---> remove old room
+
+@app.route("/api/room/list", methods=["GET"])
+def list_rooms():
+    if current_user.is_authenticated:
+        offset = request.get_json().get('offset')
+        # print(current_user.get_id())
+        user = current_user.get_id()
+        rooms = [get_room(room, include_player_info=True, include_rating=True) for room in lobby.rooms(offset, player_id=user)]
+        return jsonify(rooms)
+    else:
+        return False
 
 
 
@@ -148,8 +164,8 @@ def update_rating(player_id):
 @authenticated_only
 def connect_player():
     player_id = request.args.get('player', type=int)
-    print(player_id)
-    print(request.sid)
+    # print(player_id)
+    # print(request.sid)
     sid = request.sid
     if is_online(player_id):
         logger.debug('Player {} already online'.format(player_id))

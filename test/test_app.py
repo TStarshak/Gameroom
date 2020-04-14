@@ -85,7 +85,7 @@ def client(db, app, request):
     # app.config['TESTING'] = True
     # with app.test_client() as client:
     #     yield client
-    print(models.Player.query.all())
+    # print(models.Player.query.all())
     with app.test_client() as client:
         return client
 

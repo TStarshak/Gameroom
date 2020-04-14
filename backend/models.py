@@ -36,6 +36,10 @@ class ModelMixin(object):
     def get_by_id(cls, id_):
         return cls.query.get_or_404(id_)
 
+    @classmethod
+    def exist(cls, id_):
+        return cls.query.get(id_) is not None
+
     def representation(self):
         raise NotImplementedError
 
