@@ -24,8 +24,8 @@ class App extends Component {
     this.login = this.login.bind(this);
     this.state = {
       user: {},
-      component: <Login toRegister={this.toRegister}></Login>,
-      users: []
+      component: <Login toRegister={this.toRegister} login={this.login}></Login>,
+      all_players: [],
     }
     // this.state = {component: <MainMenu user={this.user} toNoti={this.toNoti}></MainMenu>};
   }
@@ -69,11 +69,16 @@ class App extends Component {
     })
       .then(res => res.json())
       .then((data) => {
+        if(data)
         this.setState({
           user: data,
         });
         this.toMainMenu();
       })
+  }
+
+  setUser = (username) {
+    fetch('/api/platy')
   }
 
 
@@ -86,7 +91,7 @@ class App extends Component {
   }
 
   toLogin = () => {
-    this.setState({ component: <Login toRegister={this.toRegister}></Login> })
+    this.setState({ component: <Login toRegister={this.toRegister} login={this.login}></Login> })
     console.log("to login")
   }
 
@@ -100,8 +105,8 @@ class App extends Component {
     this.setState({ component: <Rating players={players} toMainMenu={this.toMainMenu}></Rating> });
   }
 
-  toMainMenu = () => {
-    this.setState({ component: <MainMenu user={this.state.user} toNoti={this.toNoti}></MainMenu> });
+  toMainMenu(){
+    this.setState({component: <MainMenu all_players={this.state.all_players} user={this.state.user} toNoti={this.toNoti}></MainMenu>});
   }
 
   render() {
