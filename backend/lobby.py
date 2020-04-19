@@ -1,4 +1,4 @@
-from backend import app, models, conn, logger
+from backend import app, models, conn, logger, socketio
 from backend.models import RATING_MAX, RATING_MIN
 ##from backend.matchmaker import Matchmaker
 from typing import Iterator, Union, List
@@ -6,6 +6,7 @@ from logging import DEBUG
 from statistics import variance, mean
 import time
 import json
+import flask_socketio as fsio
 
 '''
 Module to implement joining and leaving logic
@@ -16,6 +17,7 @@ __ID_count = 0
 # Trying in memory first
 online_players = set() # set of player ids
 online_rooms = dict() # dictionaries that map from room to List[player_ids]
+NAMESPACE='/connection'
 
 class Matchmaker:
     '''
@@ -89,6 +91,9 @@ room -> hashmap of room_id -> room representation json
 session -> key val pairs that contains session hash to player_id to ensure single connection from socketio
 """
 
+def room_format(room_id):
+    return 'room:{}'.format(room_id)
+
 def join_room(player_id: int, room_id: int):
     conn.hset('inmatch', player_id, room_id)
     # conn.sadd('room:{}'.format(room_id), player_id)
@@ -96,6 +101,10 @@ def join_room(player_id: int, room_id: int):
     data['player_ids'].append(player_id)
     conn.hset('room', room_id, json.dumps(data))
     logger.info(DEBUG, 'Room id {} now with players {}'.format(room_id, conn.smembers(room_id)))
+
+def current_player_room(player_id: int, include_room_info=False):
+    room_id = int(conn.hget('inmatch', player_id))
+    return get_room(room_id) if include_room_info else room_id
 
 def is_in_match(player_id: int):
     return conn.hexists('inmatch', player_id)
@@ -110,7 +119,10 @@ def append_rooms(room1_id: int, room2_id: int):
     data1['player_ids'] += data2['player_ids']
     conn.hdel('room', room2_id)
     for player_id in data2['player_ids']:
-        conn.hdel('inmatch', player_id)
+        # conn.hdel('inmatch', player_id)
+        # fsio.leave_room(room_format(room2_id), sid=conn.hget('online', player_id), namespace=NAMESPACE)
+        conn.hset('inmatch', player_id, room1_id)
+        # fsio.join_room(room_format(room1_id), sid=conn.hget('online', player_id), namespace=NAMESPACE)
     conn.hset('room', room1_id, json.dumps(data1))
 
 def rating(room_id: int):
@@ -162,6 +174,7 @@ def create_room(player_ids: Union[int, List] , lobby_id: int):
     }
     for player_id in player_ids:
         conn.hset('inmatch', player_id, room_id)
+        # fsio.join_room(room_format(room_id), sid=conn.hget('online', player_id), namespace=NAMESPACE)
     conn.hset('room', room_id, json.dumps(data))
     return get_room(room_id, include_player_info=True)
 
@@ -195,8 +208,10 @@ def leave_room(player_id: int):
     data = json.loads(conn.hget('room',room_id))
     if player_id in data['player_ids']:
         data['player_ids'].remove(player_id)
+        # fsio.leave_room(room_format(room_id), sid=conn.hget('online', player_id), namespace=NAMESPACE)
     if len(data['player_ids']) == 0:
         conn.hdel('room', room_id)
+        # fsio.close_room(room_format(room_id), namespace=NAMESPACE)
     else:
         conn.hset('room', room_id, json.dumps(data))
     logger.log(DEBUG, 'Room id {} now with players {}'.format(room_id, data['player_ids']))
@@ -223,12 +238,13 @@ def connect_session(player_id: int, sid: int):
     sid: session id of socket connection
     """
 
-    sid_key = 'session:{}'.format(sid)
-    if conn.exists(sid_key) or conn.sismember('online', player_id):
+    sid_key = sid
+    if conn.hexists('session', sid_key) or is_online(player_id):
         return False
     else:
-        conn.set(sid_key, player_id)
-        conn.sadd('online', player_id)
+        conn.hset('session', sid_key, player_id)
+        conn.hset('online', player_id, sid_key)
+        # conn.sadd('online', player_id)
     if is_online(player_id):
         logger.log(DEBUG, 'Player {} now online'.format(player_id))
         return True
@@ -237,7 +253,10 @@ def connect_session(player_id: int, sid: int):
     return False
 
 def is_online(player_id):
-    return conn.sismember('online', player_id)
+    return conn.hexists('online', player_id)
+
+def player_session_id(player_id):
+    return conn.hget('online', player_id)
 
 def disconnect_session(sid: int):
     """
@@ -249,12 +268,13 @@ def disconnect_session(sid: int):
     player_id:
     sid: session id of socket connection
     """
-    player_id = conn.get('session:{}'.format(sid))
+    player_id = conn.hget('session', sid)
     if player_id is None:
         return
     else:
         player_id = int(player_id)
     leave_room(player_id)
-    conn.srem('online', player_id)
-    conn.delete('session:{}'.format(sid))
+    conn.hdel('online', player_id)
+    conn.hdel('session', sid)
+    # conn.hdel('reverse-session', player_id)
     logger.info('Player {} now offline'.format(player_id))

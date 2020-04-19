@@ -122,6 +122,7 @@ def match_player(data):
         raise ConnectionRefusedError('Player is already in an ongoing match, attempts to have another match is refused')
     room_info = lobby.create_room(player_id, lobby_id)
     new_room_info = lobby.Matchmaker.matchmake(room_info['id'])
+    # fsio.join_room(new_room_info['id'])
     socketio.emit('match', {'room': new_room_info}, namespace='/connection')
     #Deregister old room? How?
     # Match: create new room -> matching algo -- matched room w our player not inside --> adding ---> remove old room
@@ -192,3 +193,35 @@ def disconnect_player():
     # player_id = request.args.get('player', type=int)
     # assert models.Player.get_by_id(player_id)
     disconnect_session(request.sid)
+
+@socketio.on('message', '/connection')
+@authenticated_only
+def send_message(data):
+    player_id = current_user.get_id()
+    if is_in_match(player_id) and 'message' in data:
+        message = data.get('message')
+        # rooms = fsio.rooms(sid=request.sid)
+        # room = rooms[-1]
+        emit_to_player_room(player_id, {'message': message, 'sender': player_id})
+    else:
+        return False
+
+@socketio.on('leave', '/connection')
+@authenticated_only
+def leave_room(data):
+    player_id = current_user.get_id()
+    if is_in_match(player_id):
+        room_id = current_player_room(player_id)
+        emit_to_player_room(player_id, {'message': 'Player {} has left'.format(current_user.username)})
+        fsio.leave_room(room_id)
+        lobby.leave_room(player_id)
+        # socketio.send('message', 'Player {} has left'.format(player_id), room=room_id)
+        assert not is_in_match(player_id)
+    else:
+        return False
+        
+def emit_to_player_room(player_id, data):
+    room = current_player_room(player_id, include_room_info=True)
+    for player in room['player_ids']:
+        socketio.emit('message', data, room=player_session_id(player), namespace='/connection')
+
