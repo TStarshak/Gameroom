@@ -8,8 +8,7 @@ class Lobby extends Component {
   constructor(props){
     super(props)
     this.state = {
-      room: this.props.room
-
+      room: {players:[{username: 'scarria'},{username: 'Faker'},{username: 'Levi'},{username: 'Caps'}]}
     }
     this.numPeople = props.numPeople;
   }

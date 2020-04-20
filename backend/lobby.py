@@ -44,7 +44,6 @@ class Matchmaker:
                 if cls.match_quality(single_room_id, room_id) < fitness and time.time() - start > 30:
                     offset += offset * 0.5
                     fitness *= 0.75
-                    continue
                 else:
                     cls.match(room_id, single_room_id)
                     return get_room(room_id, include_player_info=True)

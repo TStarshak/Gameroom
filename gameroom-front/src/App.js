@@ -103,8 +103,9 @@ class App extends Component {
       this.socket.on('match', (data) => {
         this.setState({room: data.room})
         console.log(this.state.room)
-        this.toLobby()
+        
       })
+      this.toLobby()
     })
   }
 
