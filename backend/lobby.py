@@ -39,14 +39,15 @@ class Matchmaker:
         #             break
         start = time.time()
         player_id = get_room(single_room_id)['player_ids'][0]
-        while is_online(player_id) and size(single_room_id) == 1:
+        while is_online(player_id) and size(single_room_id) == 1 and time.time() - start < 10:
             for room_id in rooms(offset=offset, single_room_id=single_room_id):
-                if cls.match_quality(single_room_id, room_id) < fitness and time.time() - start > 30:
+                if cls.match_quality(single_room_id, room_id) < fitness:
                     offset += offset * 0.5
                     fitness *= 0.75
                 else:
                     cls.match(room_id, single_room_id)
                     return get_room(room_id, include_player_info=True)
+        return get_room(single_room_id, include_player_info=True)
 
     # @staticmethod
     # def rooms(request: Request, offset: int):
@@ -133,8 +134,10 @@ def rooms(offset=None, single_room_id=None, player_id=None) -> Iterator:
     elif player_id is not None and is_online(player_id):
         rate = models.Player.get_by_id(player_id).rating
     offset = offset or float('inf')
-    for room in conn.hkeys('room'):
+    for room in map(int, conn.hkeys('room')):
         if rate and abs(rate - rating(room)) > offset*(RATING_MAX - RATING_MIN):
+            continue
+        if room == single_room_id:
             continue
         yield room
 
