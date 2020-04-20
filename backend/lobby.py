@@ -212,9 +212,10 @@ def leave_room(player_id: int):
     if len(data['player_ids']) == 0:
         conn.hdel('room', room_id)
         # fsio.close_room(room_format(room_id), namespace=NAMESPACE)
+        logger.log(DEBUG, 'Room id {} now empty'.format(room_id, data['player_ids']))
     else:
         conn.hset('room', room_id, json.dumps(data))
-    logger.log(DEBUG, 'Room id {} now with players {}'.format(room_id, data['player_ids']))
+        logger.log(DEBUG, 'Room id {} now with players {}'.format(room_id, data['player_ids']))
 
 def save_room(room_id: int):
     """

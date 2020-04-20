@@ -147,6 +147,30 @@ def test_messaging(app, player_clients):
     assert received[-1]['args']['message'] == 'Hello'
     assert int(received[-1]['args']['sender']) == player.id
 
+def test_leaving(app, player_clients):
+    namespace = '/connection'
+    clients = player_clients.clients
+    socket_clients = player_clients.socket_clients
+    mock_players = player_clients.mock_players
+    player = random.choice(list(mock_players.values()))
+    client = clients[player.id]
+    status = client.post(
+        'api/room/leave'
+    )
+    response = client.get(
+        '/api/room/list',
+        data=json.dumps({
+            'offset': 1.0
+        }),
+        content_type='application/json'
+    )
+    status = json.loads(status.get_data(as_text=True))
+    assert status['status'] == 'Success'
+    rooms = json.loads(response.get_data(as_text=True))
+    for room in rooms:
+        assert player.id not in [player['id'] for player in room['players']]
+    
+
 
 
 

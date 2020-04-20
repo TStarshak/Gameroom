@@ -10,6 +10,7 @@ from .lobby import *
 import backend.lobby as lobby
 from flask_login import current_user, login_user, logout_user, login_required
 import functools
+from pprint import pformat
 
 def authenticated_only(f):
     @functools.wraps(f)
@@ -135,6 +136,7 @@ def list_rooms():
         # print(current_user.get_id())
         user = current_user.get_id()
         rooms = [get_room(room, include_player_info=True, include_rating=True) for room in lobby.rooms(offset, player_id=user)]
+        logger.debug(pformat(rooms))
         return jsonify(rooms)
     else:
         return False
@@ -202,23 +204,26 @@ def send_message(data):
         message = data.get('message')
         # rooms = fsio.rooms(sid=request.sid)
         # room = rooms[-1]
-        emit_to_player_room(player_id, {'message': message, 'sender': player_id})
+        emit_to_player_room(player_id, {'message': message, 'sender': player_id, 'username': current_user.username})
     else:
         return False
 
-@socketio.on('leave', '/connection')
-@authenticated_only
-def leave_room(data):
-    player_id = current_user.get_id()
+@app.route('/api/room/leave', methods=['GET', 'POST'])
+@login_required
+def leave_room():
+    player_id = int(current_user.get_id())
     if is_in_match(player_id):
         room_id = current_player_room(player_id)
-        emit_to_player_room(player_id, {'message': 'Player {} has left'.format(current_user.username)})
-        fsio.leave_room(room_id)
+        username = current_user.username
+        emit_to_player_room(player_id, {'message': 'Player {} has left'.format(username)})
         lobby.leave_room(player_id)
         # socketio.send('message', 'Player {} has left'.format(player_id), room=room_id)
-        assert not is_in_match(player_id)
+        if not is_in_match(player_id):
+            return jsonify(status='Success')
+        else:
+            return jsonify(status='Failed')
     else:
-        return False
+        return jsonify(status='Player is not in a match')
         
 def emit_to_player_room(player_id, data):
     room = current_player_room(player_id, include_room_info=True)
