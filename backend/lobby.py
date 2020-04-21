@@ -81,7 +81,7 @@ General redis instance handles
 Our main data structurs
 
 inmatch -> hashmap of player_id -> room_id where it tells which map the player is in
-online -> set of all online players
+online -> hash map of all online players to their session ids
 room -> hashmap of room_id -> room representation json
     {
         "id" : room id
@@ -255,6 +255,13 @@ def connect_session(player_id: int, sid: int):
 
 def is_online(player_id):
     return conn.hexists('online', player_id)
+
+def online_player_ids(iterate=True):
+    if iterate:
+        for player_id in conn.hkeys('online'):
+            yield int(player_id)
+    else:
+        return [int(player_id) for player_id in conn.hkeys('online')]
 
 def player_session_id(player_id):
     return conn.hget('online', player_id)

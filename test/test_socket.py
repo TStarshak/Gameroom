@@ -45,7 +45,8 @@ def player_clients(app, mock_players):
     ClientTuple = namedtuple('ClientTuple', ['socket_clients', 'clients', 'mock_players'])
     yield ClientTuple(socket_clients, clients, mock_players)
     for socket_client, client in zip(socket_clients.values(), clients.values()):
-        socket_client.disconnect(namespace=namespace)
+        if socket_client.is_connected(namespace=namespace):
+            socket_client.disconnect(namespace=namespace)
         logout(client)
         assert not socket_client.is_connected(namespace)
 
@@ -170,7 +171,36 @@ def test_leaving(app, player_clients):
     for room in rooms:
         assert player.id not in [player['id'] for player in room['players']]
     
+def test_online_players(app, client, player_clients):
+    namespace = '/connection'
+    clients = player_clients.clients
+    socket_clients = player_clients.socket_clients
+    mock_players = player_clients.mock_players
+    player, _ = models.Player.create(username='Randomplayer{}'.format(PLAYERS_TO_GEN+3), 
+                                 email='Rando{}@somewhere.somehow'.format(PLAYERS_TO_GEN+3), 
+                                 password='Rand{}'.format(PLAYERS_TO_GEN+3))
+    client = app.test_client()
+    clients[player.id] = client
+    login(player, client)
+    socket_clients[player.id] = socketio.test_client(app, flask_test_client=client)
+    player_client = socket_clients[player.id]
+    player_client.connect(namespace=namespace) # query_string='player={}'.format(player.id))
+    response = client.get(
+        '/api/player/online-list'
+    )
+    players = json.loads(response.get_data(as_text=True))
+    assert player.id in [player['id'] for player in players]
+    #Disconnect player from online
+    player_client.disconnect(namespace=namespace)
+    response = client.get(
+        '/api/player/online-list'
+    )
+    players = json.loads(response.get_data(as_text=True))
+    assert player.id not in [player['id'] for player in players]
 
+    
+
+    
 
 
 
