@@ -69,6 +69,7 @@ def login():
     if not player or not player.verify_password(password):
         return jsonify(status="Failed credentials")
     login_user(player)
+    print('done')
     return jsonify(player.representation)
 
 @app.route("/api/auth/logout", methods=["GET", "POST"])

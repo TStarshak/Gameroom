@@ -3,7 +3,6 @@ import '../Style/Lobby.css';
 
 function UserList(props){
     let maxUser = props.maxUser;
-    console.log(props.users)
     let height = parseInt(300 / maxUser) + 'px';
 
     let items = props.users.map((user) => {

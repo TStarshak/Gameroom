@@ -163,6 +163,7 @@ def create_room(player_ids: Union[int, List] , lobby_id: int):
     Create and save room
     Returns: dict of new room created
     """
+    print("Player id: " + player_ids)
     if not isinstance(player_ids, list):
         player_ids = [int(player_id) for player_id in player_ids]
     room_id = new_ID()

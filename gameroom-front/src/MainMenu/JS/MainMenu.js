@@ -3,7 +3,7 @@ import '../Style/MainMenu.css';
 import Search from './Search';
 import StarRating from './StarRating';
 import ProfileIcon from './ProfileIcon'
-
+import {Button} from 'react-bootstrap';
 
 class MainMenu extends Component {
   render(){
@@ -14,7 +14,9 @@ class MainMenu extends Component {
         <h1>{this.props.user.username}</h1>
         <h2>Rating: {this.props.user.rating}</h2>
         
+        
         <Search matching = {this.props.matching} all_players={this.props.all_players} user={this.props.user} toNoti={this.props.toNoti}></Search>
+        <Button variant='dark' className='top-fixed' onClick={this.props.logout}>Logout</Button>
       </div>
       
     );

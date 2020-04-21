@@ -14,6 +14,7 @@ class Lobby extends Component {
   }
 
   handleClick = () => {
+    this.props.endSession()
     let tmp = this.state.room.players;
     tmp.pop(0);
     this.props.toRating(tmp)

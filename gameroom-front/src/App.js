@@ -28,7 +28,9 @@ class App extends Component {
     this.setUser = this.setUser.bind(this);
     this.register = this.register.bind(this);
     this.login = this.login.bind(this);
+    this.logout = this.logout.bind(this);
     this.matching = this.matching.bind(this);
+    this.endSession = this.endSession.bind(this);
     this.socket = null;
     this.state = {
       user: {},
@@ -74,19 +76,48 @@ class App extends Component {
     })
       .then(res => res.json())
       .then((data) => {
-        console.log(data)
         if (data.status == undefined) {
           this.setState({
             user: data,
           });
           this.socket = io(this.endpoint + '/connection');
-          this.socket.on('connect_callback', data => console.log(data))
-          this.toMainMenu();
+          this.socket.on('connect_callback', data => {
+            console.log(data)
+            window.addEventListener('beforeunload', this.logout)
+            this.toMainMenu();
+          })
         }
         else {
           this.toLogin(true)
         }
       })
+  }
+
+  endSession = () => {
+    fetch('/api/room/leave', {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    }).then(res => res.json())
+    .then((data) => {console.log(data)})
+  }
+
+  
+
+  logout = () => {
+    fetch('/api/auth/logout', {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    }).then(res => res.json())
+    .then((data) => {
+      console.log('reach');
+      this.socket.disconnect()
+      window.removeEventListener('beforeunload', this.logout)
+      this.toLogin(false);
+    })
   }
 
   matching = () => {
@@ -96,16 +127,15 @@ class App extends Component {
       },
     }).then(res => res.json())
     .then((data) => {
-      console.log(data)
-      let lobby_id = data[0].id;
-      console.log(this.socket)
+      console.log(data[0])
+      let lobby_id = 0;
       this.socket.emit('match', {'lobby': lobby_id})
-      this.socket.on('match', (data) => {
-        this.setState({room: data.room})
+      this.socket.on('match', (match_data) => {
+        this.setState({room: match_data.room})
         console.log(this.state.room)
-        
+        this.toLobby()
       })
-      this.toLobby()
+      
     })
   }
 
@@ -115,7 +145,7 @@ class App extends Component {
   // __________________________________________________________ Transition_______________
 
   toLobby = () => {
-    this.setState({component: <Lobby room={this.state.room} toRating={this.toRating}></Lobby>})
+    this.setState({component: <Lobby room={this.state.room} toRating={this.toRating} endSession={this.endSession}></Lobby>})
   }
 
   toRegister = (exist) => {
@@ -139,7 +169,7 @@ class App extends Component {
   }
 
   toMainMenu() {
-    this.setState({ component: <MainMenu matching = {this.matching} all_players={this.state.all_players} user={this.state.user} toNoti={this.toNoti}></MainMenu> });
+    this.setState({ component: <MainMenu matching = {this.matching} all_players={this.state.all_players} user={this.state.user} toNoti={this.toNoti} logout={this.logout}></MainMenu> });
   }
 
   render() {
