@@ -129,6 +129,7 @@ def append_rooms(room1_id: int, room2_id: int):
 def rating(room_id: int):
     data = json.loads(conn.hget('room', room_id))
     player_ids = data['player_ids']
+    logger.debug(player_ids)
     rating = mean([models.Player.get_by_id(int(player_id)).rating for player_id in player_ids])
     return rating
 
