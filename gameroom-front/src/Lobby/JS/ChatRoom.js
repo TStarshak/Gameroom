@@ -26,17 +26,18 @@ class ChatRoom extends Component {
             ],
             user: {
                 username: 'Levi',
-            }
+            },
+            message: ''
         }
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
-    handleSubmit() {
-        return null;
+    handleSubmit = () => {
+        this.props.sendMessage(this.state.message)
     }
 
-    handleChange() {
-        return null;
+    onChange = (e) => {
+        this.setState({'message': e.target.value});
     }
 
 
@@ -53,12 +54,12 @@ class ChatRoom extends Component {
                 </ul>
                 <form className='send-message-form' onSubmit={this.handleSubmit}>
                     <input
-                        onChange={this.handleChange}
+                        onChange={this.onChange}
                         value={this.state.message}
                         placeholder='Type your message'
                         type="text"
                     />
-                    <Button type='submit'>Send</Button>
+                    <Button onClick={this.handleSubmit}>Send</Button>
                 </form>
             </div>
 

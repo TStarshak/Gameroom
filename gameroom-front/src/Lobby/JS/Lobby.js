@@ -8,9 +8,9 @@ class Lobby extends Component {
   constructor(props){
     super(props)
     this.state = {
-      room: {players:[{username: 'scarria'},{username: 'Faker'},{username: 'Levi'},{username: 'Caps'}]}
+      room: props.room
     }
-    this.numPeople = props.numPeople;
+    this.numPeople = this.state.room.players.length;
   }
 
   handleClick = () => {
@@ -30,7 +30,7 @@ class Lobby extends Component {
             <Sideboard users={this.state.room.players}></Sideboard>
           </Col>
           <Col xs={9} className='full ' style={{ paddingLeft: 0 }}>
-            <ChatRoom className=''></ChatRoom>
+            <ChatRoom className='' sendMessage={this.props.sendMessage}></ChatRoom>
           </Col>
         </Row>
       </div>

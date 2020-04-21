@@ -31,6 +31,7 @@ class App extends Component {
     this.logout = this.logout.bind(this);
     this.matching = this.matching.bind(this);
     this.endSession = this.endSession.bind(this);
+    this.sendMessage = this.sendMessage.bind(this);
     this.socket = null;
     this.state = {
       user: {},
@@ -83,9 +84,10 @@ class App extends Component {
           this.socket = io(this.endpoint + '/connection');
           this.socket.on('connect_callback', data => {
             console.log(data)
-            window.addEventListener('beforeunload', this.logout)
-            this.toMainMenu();
+            
           })
+          window.addEventListener('beforeunload', this.logout)
+          this.toMainMenu();
         }
         else {
           this.toLogin(true)
@@ -139,13 +141,17 @@ class App extends Component {
     })
   }
 
+  sendMessage = (message) => {
+    this.socket.emit('message',{'message' : message})
+  }
+
 
 
 
   // __________________________________________________________ Transition_______________
 
   toLobby = () => {
-    this.setState({component: <Lobby room={this.state.room} toRating={this.toRating} endSession={this.endSession}></Lobby>})
+    this.setState({component: <Lobby room={this.state.room} toRating={this.toRating} endSession={this.endSession} sendMessage={this.sendMessage}></Lobby>})
   }
 
   toRegister = (exist) => {
