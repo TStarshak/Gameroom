@@ -209,6 +209,10 @@ def send_message(data):
     else:
         return False
 
+@app.route('/api/player/online-list', methods=['GET', 'POST'])
+def online_players():
+    return jsonify([models.Player.get_by_id(player_id).representation for player_id in lobby.online_player_ids()])
+
 @app.route('/api/room/leave', methods=['GET', 'POST'])
 @login_required
 def leave_room():

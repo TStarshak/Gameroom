@@ -149,7 +149,7 @@ def test_player_create(client):
 def test_player_create_int(client):
     response = client.post(
         '/api/player/create',
-         data=json.dumps({'username': 22, 'password': 22, 'email': 22}),
+        data=json.dumps({'username': 22, 'password': 22, 'email': 22}),
         content_type='application/json'
     )
     print(response.get_data(as_text=True))
@@ -157,3 +157,12 @@ def test_player_create_int(client):
     player = json.loads(response.get_data(as_text=True))
     assert player['username'] == '22'
     assert player['email'] == '22'
+
+def test_lobby_list(client):
+    response = client.get(
+        '/api/lobby/list'
+    )
+    assert response.status_code == 200
+    lobbies = json.loads(response.get_data(as_text=True))
+    assert len(lobbies) == 1
+    assert lobbies[0]['id'] == 1
