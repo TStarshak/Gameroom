@@ -7,6 +7,7 @@ from statistics import variance, mean
 import time
 import json
 import flask_socketio as fsio
+from flask import session
 
 '''
 Module to implement joining and leaving logic
@@ -67,7 +68,7 @@ class Matchmaker:
             avg = (rating(room) * size(room) + rating(match_room_id))/(size(room) + size(match_room_id))
             players = get_room(room)['player_ids'] + get_room(match_room_id)['player_ids']
             logger.debug(players)
-            return variance([models.Player.get_by_id(player).rating for player in players])/((RATING_MAX - avg)*(avg - RATING_MIN))
+            return variance([models.Player.get_by_id(int(player)).rating for player in players])/((RATING_MAX - avg)*(avg - RATING_MIN))
         return 1.0 - ((2/3)*diff_rating(match_room_id, room_id) + (1/3)*var_rating(match_room_id, room_id))
     
     @classmethod
@@ -127,7 +128,7 @@ def append_rooms(room1_id: int, room2_id: int):
 def rating(room_id: int):
     data = json.loads(conn.hget('room', room_id))
     player_ids = data['player_ids']
-    rating = mean([models.Player.get_by_id(player_id).rating for player_id in player_ids])
+    rating = mean([models.Player.get_by_id(int(player_id)).rating for player_id in player_ids])
     return rating
 
 def rooms(offset=None, single_room_id=None, player_id=None) -> Iterator:
@@ -190,7 +191,7 @@ def get_room(room_id, include_player_info=False, include_rating=True):
     include_rating: include room rating
     """
     room_info = json.loads(conn.hget('room',room_id))
-    players = [models.Player.get_by_id(player_id) for player_id in room_info['player_ids']]
+    players = [models.Player.get_by_id(int(player_id)) for player_id in room_info['player_ids']]
     if include_player_info:
         room_info['players'] = [player.representation for player in players]
         del room_info['player_ids']
@@ -226,7 +227,7 @@ def save_room(room_id: int):
     data = json.loads(conn.hget('room',room_id))
     player_ids = data['player_ids']
     lobby_id = data['lobby_id']
-    players = [models.Player.get_by_id(player_id) for player_id in player_ids]
+    players = [models.Player.get_by_id(int(player_id)) for player_id in player_ids]
     room, status = models.Room.create(players=players, lobby_id=lobby_id)
 
 def connect_session(player_id: int, sid: int):

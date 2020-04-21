@@ -22,6 +22,14 @@ def authenticated_only(f):
             return f(*args, **kwargs)
     return wrapped
 
+@app.before_request
+def make_session_permanent():
+    '''
+    [Experimental]
+    Disable in case giving unwanted behavior!!!
+    '''
+    session.permanent = True 
+
 @app.route("/api/player/create", methods=["POST"])
 def create_player():
     """
@@ -121,7 +129,8 @@ def match_player(data):
     # new_room_id = Matchmaker.match(room.id) # Get a potential room
     # new_room = models.Room.get_by_id(new_room_id) #Get room info
     if is_in_match(player_id):
-        raise ConnectionRefusedError('Player is already in an ongoing match, attempts to have another match is refused')
+        socketio.emit('match', {'room': current_player_room(player_id, include_room_info=True)}, namespace=namespace)
+        return True
     room_info = lobby.create_room(player_id, lobby_id)
     new_room_info = lobby.Matchmaker.matchmake(room_info['id'])
     # fsio.join_room(new_room_info['id'])
