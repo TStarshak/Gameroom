@@ -129,7 +129,8 @@ def match_player(data):
     # new_room_id = Matchmaker.match(room.id) # Get a potential room
     # new_room = models.Room.get_by_id(new_room_id) #Get room info
     if is_in_match(player_id):
-        socketio.emit('match', {'room': current_player_room(player_id, include_room_info=True)}, namespace=namespace)
+        socketio.emit('match', {'room': current_player_room(player_id, include_room_info=True)
+                                'msg': 'Has not left room'}, namespace='/connection')
         return True
     room_info = lobby.create_room(player_id, lobby_id)
     new_room_info = lobby.Matchmaker.matchmake(room_info['id'])
