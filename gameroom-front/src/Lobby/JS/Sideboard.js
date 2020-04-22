@@ -10,6 +10,7 @@ class Sideboard extends Component {
     }
 
     render() {
+        console.log(this.props.user.username)
         return (
             <div className="sideboard flex-container-column">
                 <div className="flex-item upper-sideboard">
@@ -20,7 +21,7 @@ class Sideboard extends Component {
 
                 </div>
                 <div className='flex-item profile '>
-                    <p>Scarria</p>
+                    <p>{this.props.user.username}</p>
                     {/* <div className='flex-item'>
                         <div className='imwrap'>
                             <img src="https://i.ibb.co/sg0q559/Featherknight-Summoner-Icon-TFT-Lo-L.jpg" width='30px' height='30px' alt="icon"></img>

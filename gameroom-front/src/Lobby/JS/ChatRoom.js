@@ -8,41 +8,29 @@ class ChatRoom extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            messages: [
-                { id: '123', username: 'Faker', text: 'Yo dude                     fsdf' },
-                { id: '123', username: 'Faker', text: 'Yo dude f d sa á' },
-                { id: '123', username: 'Faker', text: 'Yo dudfdae' },
-                { id: '123', username: 'Faker', text: 'Yo dude' },
-                { id: '123', username: 'Faker', text: 'Yo dudefdasfds dfd dfd ' },
-                { id: '123', username: 'Faker', text: 'Yo dude' },
-                { id: '123', username: 'Faker', text: 'Yo dude fgsdfvf fgf gf fgf gsdfgsdf gdfg fgfg gfgdf  gfgf  gfg  dfdfasdfdsfdsfsdfsdf' },
-                { id: '123', username: 'Levi', text: '1324t6 56656 ' },
-                { id: '123', username: 'Faker', text: 'test test' },
-                // { id: '234', username: 'Perks', text: 'Chao may Faker' },
-                // { id: '123', username: 'Levi', text: 'Chao may Caps' },
-                // { id: '123', username: 'Faker', text: 'Chao may' },
-                // { id: '234', username: 'Perks', text: 'Chao may Faker' },
-                // { id: '123', username: 'Levi', text: 'Chao may Caps' }
-            ],
-            user: {
-                username: 'Levi',
-            },
+            messages: this.props.messages,
+            user: this.props.user,
             message: ''
         }
         this.handleSubmit = this.handleSubmit.bind(this);
+        setInterval(() => {console.log('update')
+             this.setState({ messages: this.props.messages }) },3000)
     }
 
     handleSubmit = () => {
         this.props.sendMessage(this.state.message)
+        this.setState({ message: '' })
     }
 
     onChange = (e) => {
-        this.setState({'message': e.target.value});
+        this.setState({ 'message': e.target.value });
     }
+
 
 
 
     render() {
+        console.log(this.state.messages)
         return (
             <div className='full chatRoom'>
                 <ul className='message-list'>
@@ -52,7 +40,7 @@ class ChatRoom extends Component {
                         )
                     })}
                 </ul>
-                <form className='send-message-form' onSubmit={this.handleSubmit}>
+                <form className='send-message-form' >
                     <input
                         onChange={this.onChange}
                         value={this.state.message}

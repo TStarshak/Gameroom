@@ -169,6 +169,7 @@ def create_room(player_ids: Union[int, List] , lobby_id: int):
     if not isinstance(player_ids, list):
         player_ids = [int(player_id) for player_id in player_ids]
     room_id = new_ID()
+    print('room id ' + str(room_id))
     data = {
         'id' : room_id,
         'lobby_id' : lobby_id,
@@ -192,12 +193,14 @@ def get_room(room_id, include_player_info=False, include_rating=True):
     include_rating: include room rating
     """
     room_info = json.loads(conn.hget('room',room_id))
+    print(room_info['player_ids'])
     players = [models.Player.get_by_id(int(player_id)) for player_id in room_info['player_ids']]
     if include_player_info:
         room_info['players'] = [player.representation for player in players]
         del room_info['player_ids']
     if include_rating:
         room_info['rating'] = rating(room_id)
+
     return room_info
 
 def leave_room(player_id: int):

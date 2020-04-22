@@ -37,6 +37,7 @@ class App extends Component {
       user: {},
       component: <Login toRegister={this.toRegister} login={this.login} incorrect={false}></Login>,
       room: {},
+      messages: [],
     }
     // this.state = {component: <MainMenu user={this.user} toNoti={this.toNoti}></MainMenu>};
   }
@@ -82,10 +83,7 @@ class App extends Component {
             user: data,
           });
           this.socket = io(this.endpoint + '/connection');
-          this.socket.on('connect_callback', data => {
-            console.log(data)
-            
-          })
+          this.setupSocket()
           window.addEventListener('beforeunload', this.logout)
           this.toMainMenu();
         }
@@ -95,7 +93,20 @@ class App extends Component {
       })
   }
 
+  addMessage = (message) => {
+    this.state.messages.push(message)
+    this.setState({messages: this.state.messages})
+  }
+
+  setupSocket = () => {
+    this.socket.on('connect_callback', data => {
+      console.log(data) 
+    })
+    this.socket.on('message', data=>{this.addMessage(data)})
+  }
+
   endSession = () => {
+    this.setState({messages: []})
     fetch('/api/room/leave', {
       method: "POST",
       headers: {
@@ -108,6 +119,7 @@ class App extends Component {
   
 
   logout = () => {
+    this.socket.disconnect()
     fetch('/api/auth/logout', {
       method: "POST",
       headers: {
@@ -116,7 +128,7 @@ class App extends Component {
     }).then(res => res.json())
     .then((data) => {
       console.log('reach');
-      this.socket.disconnect()
+      
       window.removeEventListener('beforeunload', this.logout)
       this.toLogin(false);
     })
@@ -151,7 +163,7 @@ class App extends Component {
   // __________________________________________________________ Transition_______________
 
   toLobby = () => {
-    this.setState({component: <Lobby room={this.state.room} toRating={this.toRating} endSession={this.endSession} sendMessage={this.sendMessage}></Lobby>})
+    this.setState({component: <Lobby messages={this.state.messages} room={this.state.room} toRating={this.toRating} endSession={this.endSession} sendMessage={this.sendMessage} user={this.state.user}></Lobby>})
   }
 
   toRegister = (exist) => {

@@ -8,7 +8,8 @@ class Lobby extends Component {
   constructor(props){
     super(props)
     this.state = {
-      room: props.room
+      room: props.room,
+      messages: this.props.messages
     }
     this.numPeople = this.state.room.players.length;
   }
@@ -20,6 +21,8 @@ class Lobby extends Component {
     this.props.toRating(tmp)
   }
 
+
+
   render() {
     return (
       
@@ -27,10 +30,10 @@ class Lobby extends Component {
         <Button className="end-session" variant="danger" onClick={this.handleClick}>End session</Button>
         <Row className='full'>
           <Col xs={3} className='' style={{ paddingRight: 0 }}>
-            <Sideboard users={this.state.room.players}></Sideboard>
+            <Sideboard users={this.state.room.players} user={this.props.user}></Sideboard>
           </Col>
           <Col xs={9} className='full ' style={{ paddingLeft: 0 }}>
-            <ChatRoom className='' sendMessage={this.props.sendMessage}></ChatRoom>
+            <ChatRoom messages={this.state.messages} className='' user={this.props.user} sendMessage={this.props.sendMessage}></ChatRoom>
           </Col>
         </Row>
       </div>

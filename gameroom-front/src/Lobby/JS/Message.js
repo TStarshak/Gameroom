@@ -10,7 +10,7 @@ function Message(props) {
             </div>
             <div className='bounding'>
                 <div className='message-text'>
-                    {message.text}
+                    {message.message}
                 </div>
             </div>
             
