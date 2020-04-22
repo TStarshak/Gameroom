@@ -122,7 +122,6 @@ def match_player(data):
     if 'lobby' not in data:
         raise ConnectionRefusedError('Lobby missing or not exist')
     lobby_id = data['lobby']
-    print(lobby_id)
     # create new single room with player inside
     # players = [models.Player.get_by_id(player_id)]
     # room, status = models.Room.create(players=players, lobby_id=lobby_id)
@@ -132,8 +131,13 @@ def match_player(data):
         socketio.emit('match', {'room': current_player_room(player_id, include_room_info=True),
                                 'msg': 'Has not left room'}, namespace='/connection')
         return True
+    print('ids ' + str(player_id) + ' ' + str(lobby_id))
     room_info = lobby.create_room(player_id, lobby_id)
+    print('old')
+    print(room_info['players'])
     new_room_info = lobby.Matchmaker.matchmake(room_info['id'])
+    print('new')
+    print(new_room_info['players'])
     # fsio.join_room(new_room_info['id'])
     socketio.emit('match', {'room': new_room_info}, namespace='/connection')
     #Deregister old room? How?
