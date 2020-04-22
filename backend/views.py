@@ -141,6 +141,7 @@ def match_player(data):
     new_room_info = lobby.Matchmaker.matchmake(room_info['id'])
     print('new')
     print(new_room_info['players'])
+    player = models.Player.get_by_id(player_id)
     # fsio.join_room(new_room_info['id'])
     socketio.emit('match', {'room': new_room_info}, namespace='/connection')
     emit_to_player_room(player_id, data=player.representation, event='new join')
