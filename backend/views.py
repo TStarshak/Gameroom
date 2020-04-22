@@ -11,6 +11,7 @@ import backend.lobby as lobby
 from flask_login import current_user, login_user, logout_user, login_required
 import functools
 from pprint import pformat
+from flask_login.config import EXEMPT_METHODS
 
 def authenticated_only(f):
     @functools.wraps(f)
@@ -22,13 +23,13 @@ def authenticated_only(f):
             return f(*args, **kwargs)
     return wrapped
 
-@app.before_request
-def make_session_permanent():
-    '''
-    [Experimental]
-    Disable in case giving unwanted behavior!!!
-    '''
-    session.permanent = True 
+# @app.before_request
+# def make_session_permanent():
+#     '''
+#     [Experimental]
+#     Disable in case giving unwanted behavior!!!
+#     '''
+#     session.permanent = True 
 
 @app.route("/api/player/create", methods=["POST"])
 def create_player():
@@ -72,17 +73,19 @@ def login():
     data = request.get_json()
     username = data['username']
     password = data['password']
+    logger.debug(data)
     player = models.Player.query.filter_by(username=username).first()
     # print(player.representation)
     if not player or not player.verify_password(password):
         return jsonify(status="Failed credentials")
     login_user(player)
-    print('done')
+    logger.debug('Player found on login {}'.format(current_user.username))
     return jsonify(player.representation)
 
 @app.route("/api/auth/logout", methods=["GET", "POST"])
-@login_required
 def logout():
+    # logger.debug('Current user on logout is {}'.format(current_user.username))
+    # logger.debug(current_user.username)
     logout_user()
     return jsonify(status="logged out")
 
@@ -136,6 +139,7 @@ def match_player(data):
     new_room_info = lobby.Matchmaker.matchmake(room_info['id'])
     # fsio.join_room(new_room_info['id'])
     socketio.emit('match', {'room': new_room_info}, namespace='/connection')
+    emit_to_player_room(player_id, data={'message': 'Player {} has joined'.format(current_user.username)})
     #Deregister old room? How?
     # Match: create new room -> matching algo -- matched room w our player not inside --> adding ---> remove old room
 
@@ -223,10 +227,13 @@ def send_message(data):
 def online_players():
     return jsonify([models.Player.get_by_id(player_id).representation for player_id in lobby.online_player_ids()])
 
-@app.route('/api/room/leave', methods=['GET', 'POST'])
-@login_required
+# @app.route('/api/room/leave', methods=['GET', 'POST'])
+# @login_required
+@socketio.on('leave', namespace='/connection')
+@authenticated_only
 def leave_room():
-    player_id = int(current_user.get_id())
+    logger.debug(current_user.username)
+    player_id = int(session_player_id(request.sid))
     if is_in_match(player_id):
         room_id = current_player_room(player_id)
         username = current_user.username
@@ -234,11 +241,12 @@ def leave_room():
         lobby.leave_room(player_id)
         # socketio.send('message', 'Player {} has left'.format(player_id), room=room_id)
         if not is_in_match(player_id):
-            return jsonify(status='Success')
+            emit_to_player_room(player_id, {'message': 'Player {} has left'.format(models.Player.get_by_id(player_id).username)})
+            return socketio.emit('leave', data={'status':'Success'}, namespace='/connection')
         else:
-            return jsonify(status='Failed')
+            return socketio.emit('leave', data={'status':'Failed'}, namespace='/connection')
     else:
-        return jsonify(status='Player is not in a match')
+        return socketio.emit('leave', data={'status':'In a match'}, namespace='/connection')
         
 def emit_to_player_room(player_id, data):
     room = current_player_room(player_id, include_room_info=True)
