@@ -139,6 +139,7 @@ def match_player(data):
     new_room_info = lobby.Matchmaker.matchmake(room_info['id'])
     # fsio.join_room(new_room_info['id'])
     socketio.emit('match', {'room': new_room_info}, namespace='/connection')
+    emit_to_player_room(player_id, data=player.representation, event='new join')
     emit_to_player_room(player_id, data={'message': 'Player {} has joined'.format(current_user.username)})
     #Deregister old room? How?
     # Match: create new room -> matching algo -- matched room w our player not inside --> adding ---> remove old room
@@ -248,8 +249,8 @@ def leave_room():
     else:
         return socketio.emit('leave', data={'status':'In a match'}, namespace='/connection')
         
-def emit_to_player_room(player_id, data):
+def emit_to_player_room(player_id, data, event='message'):
     room = current_player_room(player_id, include_room_info=True)
     for player in room['player_ids']:
-        socketio.emit('message', data, room=player_session_id(player), namespace='/connection')
+        socketio.emit(event, data, room=player_session_id(player), namespace='/connection')
 
