@@ -67,7 +67,7 @@ class Matchmaker:
         def var_rating(match_room_id, room):
             avg = (rating(room) * size(room) + rating(match_room_id))/(size(room) + size(match_room_id))
             players = get_room(room)['player_ids'] + get_room(match_room_id)['player_ids']
-            logger.debug(players)
+            # logger.debug(players)
             return variance([models.Player.get_by_id(int(player)).rating for player in players])/((RATING_MAX - avg)*(avg - RATING_MIN))
         return 1.0 - ((2/3)*diff_rating(match_room_id, room_id) + (1/3)*var_rating(match_room_id, room_id))
     
@@ -128,7 +128,7 @@ def append_rooms(room1_id: int, room2_id: int):
 def rating(room_id: int):
     data = json.loads(conn.hget('room', room_id))
     player_ids = data['player_ids']
-    logger.debug(player_ids)
+    # logger.debug(player_ids)
     rating = mean([models.Player.get_by_id(int(player_id)).rating for player_id in player_ids])
     return rating
 
@@ -165,6 +165,7 @@ def create_room(player_ids: Union[int, List] , lobby_id: int):
     Create and save room
     Returns: dict of new room created
     """
+    # print("Player id: " + player_ids)
     if not isinstance(player_ids, list):
         player_ids = [int(player_id) for player_id in player_ids]
     room_id = new_ID()
@@ -204,7 +205,7 @@ def get_room(room_id, include_player_info=False, include_rating=True):
 
 def leave_room(player_id: int):
     room_id = conn.hget('inmatch', player_id)
-    if room_id is None:
+    if not conn.hexists('inmatch', player_id):
         return
     conn.hdel('inmatch', player_id)
     # conn.srem('room:{}'.format(room_id), player_id)
@@ -269,6 +270,9 @@ def online_player_ids(iterate=True):
 
 def player_session_id(player_id):
     return conn.hget('online', player_id)
+
+def session_player_id(sid):
+    return conn.hget('session', sid)
 
 def disconnect_session(sid: int):
     """

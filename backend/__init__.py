@@ -62,5 +62,7 @@ from backend import views, models
 
 
 @login_manager.user_loader
-def load_user(user_id):
-    return models.Player.get_by_id(user_id)
+def load_user(userid):
+        #: Flask Peewee used here to return the user object
+    return models.Player.query.get(userid)
+
