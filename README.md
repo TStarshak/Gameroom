@@ -14,8 +14,8 @@ redis-server```
 
 Then run the command ```python3 manage.py populate``` once and any afterwards should be ```python3 manage.py run```
 
-The front end can be run using ```npm install
-npm start```
+The front end can be run using ```npm install``` 
+```npm start```
 
 # Front end
 
