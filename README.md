@@ -17,7 +17,9 @@ Then run the command ```python3 manage.py populate``` once and any afterwards sh
 The front end can be run using ```npm install
 npm start```
 
+# Front end
+
 # Known issues
 - Testing environment are incompatible with Windows systems, currentl only runs reliably for *nix systems
 - Redis reliability will require additonal refactoring as the current means of access the redis server is fairly error prone
-- 
+- CORS Header is still set to any endpoint
