@@ -3,6 +3,14 @@ flask_sqlalchemy
 flask_bcrypt
 flask-redis
 flask-script
+flask-migrate
 green
 tox
 pytest
+rq
+redis
+flask-socketio
+flask-login
+pprint
+pytest-cov
+flask-cors

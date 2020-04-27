@@ -3,15 +3,20 @@ import '../Style/MainMenu.css';
 import Search from './Search';
 import StarRating from './StarRating';
 import ProfileIcon from './ProfileIcon'
+import {Button} from 'react-bootstrap';
+
 class MainMenu extends Component {
   render(){
+  
     return (
       <div className="MainMenu">
         <ProfileIcon src="https://i.ibb.co/sg0q559/Featherknight-Summoner-Icon-TFT-Lo-L.jpg"></ProfileIcon>
         <h1>{this.props.user.username}</h1>
-        <StarRating rating="4.3"></StarRating>
+        <h2>Rating: {this.props.user.rating}</h2>
         
-        <Search all_players={this.props.all_players} user={this.props.user} toNoti={this.props.toNoti}></Search>
+        
+        <Search matching = {this.props.matching} all_players={this.props.all_players} user={this.props.user} toNoti={this.props.toNoti}></Search>
+        <Button variant='dark' className='top-fixed' onClick={this.props.logout}>Logout</Button>
       </div>
       
     );

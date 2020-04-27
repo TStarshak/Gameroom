@@ -1,0 +1,14 @@
+h1 {
+    text-align: center;
+}
+
+
+
+.login{
+    width: 40%;
+    margin: 50px auto;
+    background-color: white;
+    border-radius: 10px;
+    padding: 10px 10px;
+}
+

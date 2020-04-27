@@ -9,7 +9,9 @@ I think it would be best if the front end people work on their own branch and ba
 
 We will be running REDIS for gameroom queues and online player storage
 
-TODO
+TODO:
+
+Current redis instance must be ran before any testing is allowed
 
 # Frontend
 

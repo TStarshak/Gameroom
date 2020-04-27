@@ -18,3 +18,19 @@ __pycache__/
 *egg-info/
 
 *.eggs/
+
+backend.db
+
+migrations/
+
+redis*/
+
+*.tar.gz
+
+*.zip
+
+*.rar
+
+package-lock.json
+
+node_modules/
