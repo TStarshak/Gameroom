@@ -12,10 +12,15 @@ In order to run the system, redis service must be start
 Using ```
 redis-server```
 
+Python requirements can be installed using ```pip install -r requirements.txt```
+
 Then run the command ```python3 manage.py populate``` once and any afterwards should be ```python3 manage.py run```
 
 The front end can be run using ```npm install``` 
 ```npm start```
+
+### Testing the code. 
+This is recommended in order to check your system setup  ```python3 -m pytest --cov=backend test/```. This should output coverage and test results for each tests defined for the system
 
 # Front end
 
