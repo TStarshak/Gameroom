@@ -2,17 +2,22 @@
 Repo for the development of the Gameroom system for Software Engineering
 
 # Contributing
+Follow the user guide to install the system and fork this repo. If you would want to make any changes, please make a pull request
+# User guide
 
-I think it would be best if the front end people work on their own branch and back end people work on their own branch
+requirements to run system: npm, python3.6 or more, redis-server
 
-# Backend
+In order to run the system, redis service must be start
 
-We will be running REDIS for gameroom queues and online player storage
+Using ```
+redis-server```
 
-TODO:
+Then run the command ```python3 manage.py populate``` once and any afterwards should be ```python3 manage.py run```
 
-Current redis instance must be ran before any testing is allowed
+The front end can be run using ```npm install
+npm start```
 
-# Frontend
-
-TODO
+# Known issues
+- Testing environment are incompatible with Windows systems, currentl only runs reliably for *nix systems
+- Redis reliability will require additonal refactoring as the current means of access the redis server is fairly error prone
+- 
