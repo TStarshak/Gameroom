@@ -24,15 +24,15 @@ This is recommended in order to check your system setup  ```python3 -m pytest --
 
 # Front end
 - Login or Register at the starting page.
-![Login](screenshots/signin.png?s=200)
+![Login|30%](screenshots/signin.png)
 - User will be directed to the main menu page.
 - From main menu page, user can logout or choose any game/play time/server to match and hit matchmake
-![Main Menu](screenshots/main_menu.png?s=200)
+![Main Menu|30%](screenshots/main_menu.png)
 - After matchmake, you will be directed into a lobby with users matched.
-![Lobby](screenshots/lobby.png?s=200)
+![Lobby|30%](screenshots/lobby.png)
 - After user is done with the session, click "End Session".
 - User will be directed to rating page to rate other users. After user is done, go back to main menu.
-![Rating](screenshots/rating.png?s=200)
+![Rating|30%](screenshots/rating.png)
 
 # Known issues
 - Testing environment are incompatible with Windows systems, currentl only runs reliably for *nix systems
